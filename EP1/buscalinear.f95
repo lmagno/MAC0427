@@ -4,38 +4,38 @@ module BuscaLinear
 contains
     subroutine maximaDescida(x, x0, f, g, gamma, eps)
         ! Entrada
-        real, intent(in) :: x0(:)   ! Ponto inicial
-        real, intent(in) :: eps     ! Tolerância
-        real, intent(in) :: gamma   ! γ > 0, Constante para condição de Armijo
+        double precision, intent(in) :: x0(:)   ! Ponto inicial
+        double precision, intent(in) :: eps     ! Tolerância
+        double precision, intent(in) :: gamma   ! γ > 0, Constante para condição de Armijo
 
         ! Função e suas derivadas
         interface
             function f(x)
-                real, intent(in) :: x(:)
-                real             :: f
+                double precision, intent(in) :: x(:)
+                double precision             :: f
             end function f
 
             function g(x)
-                real, intent(in) :: x(:)
-                real             :: g(size(x))
+                double precision, intent(in) :: x(:)
+                double precision             :: g(size(x))
             end function g
         end interface
 
         ! Saída
-        real, intent(out) :: x(:)
+        double precision, intent(out) :: x(:)
 
         ! Variáveis locais
         integer           :: n       ! Dimensão do problema
-        real, allocatable :: d(:)    ! Direção
-        real              :: alpha   ! Passo
-        real              :: a, b    ! Coeficientes da aproximação quadrática
+        double precision, allocatable :: d(:)    ! Direção
+        double precision              :: alpha   ! Passo
+        double precision              :: a, b    ! Coeficientes da aproximação quadrática
                                      ! de f
 
         ! Variáveis para evitar chamadas de função desnecessárias
-        real              :: fx      ! f(x)
-        real, allocatable :: gx(:)   ! g(x)
-        real              :: gTd     ! gᵀ(x)d
-        real              :: fxd     ! f(x + alpha*d)
+        double precision              :: fx      ! f(x)
+        double precision, allocatable :: gx(:)   ! g(x)
+        double precision              :: gTd     ! gᵀ(x)d
+        double precision              :: fxd     ! f(x + alpha*d)
 
         ! Aloca
         n = size(x0)
@@ -48,8 +48,6 @@ contains
         gx = g(x)
 
         do while (norm2(gx) > eps)
-            print *, norm2(gx)
-            print *, x
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             ! Máxima descida
             d = -gx
@@ -60,7 +58,6 @@ contains
             ! Condição de Armijo
             fxd = f(x + alpha*d)
             do while (fxd > fx + alpha*gamma*gTd)
-                print *, fxd - fx - alpha*gamma*gTd
                 ! Aproximação quadrática de f perto de x ao longo de d:
                 !     q(alpha) = a*alpha^2 + b*alpha + c
                 ! cujo minimizador é

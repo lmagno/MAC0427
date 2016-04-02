@@ -28,14 +28,14 @@ module MGH
                                                    "Wood", &
                                                    "Chebyquad"]
 
-    public :: setprob, getdim, getname, setinit, f
+    public :: setprob, getdim, getname, getinit, f, g
 contains
-    subroutine setprob(mprob)
-        integer, intent(in)  :: mprob
+    subroutine setprob(i)
+        integer, intent(in)  :: i
 
-        n      = vn(mprob)
-        nprob  = mprob
-        ntries = vntries(mprob)
+        n      = vn(i)
+        nprob  = i
+        ntries = vntries(i)
     end subroutine setprob
 
     function getdim()
@@ -50,45 +50,24 @@ contains
         getname = names(nprob)
     end function getname
 
-    subroutine setinit(x, factor)
+    function getinit(factor)
         double precision, intent(in)  :: factor
-        double precision, intent(out) :: x(n)
+        double precision              :: getinit(n)
 
-        call INITPT(n, x, nprob, factor)
-    end subroutine setinit
+        call INITPT(n, getinit, nprob, factor)
+    end function getinit
 
     function f(x)
-        double precision :: x(n)
-        double precision :: f
+        double precision, intent(in) :: x(:)
+        double precision             :: f
 
         call OBJFCN(n, x, f, nprob)
     end function f
+
+    function g(x)
+      double precision, intent(in) :: x(:)
+      double precision             :: g(size(x))
+
+      call GRDFCN(n, x, g, nprob)
+    end function g
 end module MGH
-
-program main
-    use MGH
-    implicit none
-
-    integer                       :: n, nprob
-    character(len=30)             :: name
-    double precision              :: factor = 1.d0
-    double precision, allocatable :: x(:)
-
-    call setprob(3)
-    name = getname()
-    print *, name
-    n = getdim()
-    print *, "n =", n
-    allocate(x(n))
-    x(:) = 0.d0
-    print *, "x     =", x
-    print *, "f(x)  =", f(x)
-
-    call setinit(x, factor)
-    print *, "x0    =", x
-    print *, "f(x0) =", f(x)
-
-    ! print *, vn
-    ! print *, names(1)
-    deallocate(x)
-end program main
