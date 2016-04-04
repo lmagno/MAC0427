@@ -4,6 +4,7 @@ module MGH
 
     private
     integer :: n, nprob, ntries
+    integer :: nf = 0, ng = 0
 
     integer :: nprobs  = 18
     integer,           dimension(18) :: vn      = (/ 3, 6, 3, 2, 3, 4, 10, 2, 2, 2, 4, 3, 2, 12, 4, 2, 4, 2/)
@@ -28,7 +29,7 @@ module MGH
                                                    "Wood", &
                                                    "Chebyquad"]
 
-    public :: setprob, getdim, getname, getinit, f, g
+    public :: setprob, getdim, gettries, getname, getinit, f, g, nfev, ngev
 contains
     subroutine setprob(i)
         integer, intent(in)  :: i
@@ -36,6 +37,9 @@ contains
         n      = vn(i)
         nprob  = i
         ntries = vntries(i)
+
+        nf = 0
+        ng = 0
     end subroutine setprob
 
     function getdim()
@@ -43,6 +47,12 @@ contains
 
         getdim = n
     end function getdim
+
+    function gettries()
+        integer :: gettries
+
+        gettries = vntries(nprob)
+    end function gettries
 
     function getname()
         character(len=30)   :: getname
@@ -62,12 +72,27 @@ contains
         double precision             :: f
 
         call OBJFCN(n, x, f, nprob)
+        nf = nf + 1
     end function f
+
+    function nfev()
+        integer :: nfev
+
+        nfev = nf
+    end function nfev
 
     function g(x)
       double precision, intent(in) :: x(:)
       double precision             :: g(size(x))
 
       call GRDFCN(n, x, g, nprob)
+      ng = ng + 1
     end function g
+
+    function ngev()
+        integer :: ngev
+
+        ngev = ng
+    end function ngev
+
 end module MGH
