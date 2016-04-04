@@ -1,17 +1,17 @@
 TARGET = EP1
 
-SRC = ./
+SRC = ./src/
 OBJ = ./obj/
 
-MGHSRC    = ./MGH/
 MGHSUB    = INITPT OBJFCN GRDFCN HESFCN
-MGHFILES += $(addprefix $(MGHSRC), $(MGHSUB:=.f))
+MGHFILES += $(addprefix $(SRC), $(MGHSUB:=.f))
 
 MODNAMES  = buscalinear mgh
 MODFILES  = $(MODNAMES:=.mod)
+MODFILES := $(addprefix $(OBJ), $(MODFILES))
+
 OBJFILES  = $(MODNAMES:=.o)
 OBJFILES += $(MGHSUB:=.o)
-MODFILES := $(addprefix $(OBJ), $(MODFILES))
 OBJFILES := $(addprefix $(OBJ), $(OBJFILES))
 OBJFILES += $(OBJ)$(TARGET).o
 
@@ -33,11 +33,8 @@ clean:
 $(OBJ)$(TARGET).o: $(TARGET).f95 $(MODFILES)
 	$(FC) -I$(OBJ) -c $< -o $@
 
-$(OBJ)mgh.mod $(OBJ)mgh.o: $(MGHSRC)mgh.f95
-	$(FC) -J$(OBJ) -c $< -o $(OBJ)mgh.o
+$(OBJ)%.o $(OBJ)%.mod: $(SRC)%.f95
+	$(FC) -J$(OBJ) -c $< -o $(OBJ)$*.o
 
-$(OBJ)buscalinear.mod $(OBJ)buscalinear.o: $(SRC)buscalinear.f95
-	$(FC) -J$(OBJ) -c $< -o $(OBJ)buscalinear.o
-
-$(OBJ)%.o: $(MGHSRC)%.f
+$(OBJ)%.o: $(SRC)%.f
 	$(FC) -c $< -o $@
