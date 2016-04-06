@@ -25,11 +25,12 @@ contains
         double precision, intent(out) :: x(:)
 
         ! Variáveis locais
-        integer           :: n       ! Dimensão do problema
+        integer                       :: n       ! Dimensão do problema
         double precision, allocatable :: d(:)    ! Direção
         double precision              :: alpha   ! Passo
         double precision              :: a, b    ! Coeficientes da aproximação quadrática
-                                     ! de f
+                                                 ! de f
+        double precision :: min
 
         ! Variáveis para evitar chamadas de função desnecessárias
         double precision              :: fx      ! f(x)
@@ -53,7 +54,7 @@ contains
             d = -gx
             gTd = dot_product(gx, d)
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            alpha = 1.0
+            alpha = 1.d0
 
             ! Condição de Armijo
             fxd = f(x + alpha*d)
@@ -66,7 +67,17 @@ contains
                 a = (fxd - fx - alpha*gTd)/(alpha*alpha)
                 b = gTd
 
-                alpha = -b/(2*a)
+                min = -b/(2.d0*a)
+
+                ! Escolhe novo α tal que 0.1α <= α <= 0.9α
+                if (min < 0.1d0*alpha) then
+                    alpha = 0.1d0*alpha
+                else if (min > 0.9*alpha) then
+                    alpha = 0.9d0*alpha
+                else
+                    alpha = min
+                end if
+
                 fxd = f(x + alpha*d)
             end do
 
