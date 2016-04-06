@@ -9,7 +9,7 @@ program EP1
     double precision, allocatable :: x(:), x0(:)
     double precision              :: gamma, eps
 
-    gamma = 0.1d0
+    gamma = 1e-4
     ! eps   = epsilon(0.d0)
     eps = 1e-3
     print '(3A)', "nprob     ", "name                          ", "‖∇f(x₀)‖  "

@@ -73,6 +73,9 @@ contains
 
         call OBJFCN(n, x, f, nprob)
         nf = nf + 1
+        if (nf > 1000000) then
+           call exit(1)
+        end if
     end function f
 
     function nfev()
