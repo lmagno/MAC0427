@@ -48,13 +48,17 @@ contains
         fx = f(x)
         gx = g(x)
 
+        alpha = 1.d0
+        gTd   = -norm2(gx)
         do while (norm2(gx) > eps)
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             ! Máxima descida
             d = -gx
-            gTd = dot_product(gx, d)
-            !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            alpha = 1.d0
+
+            ! Aproxima chute inicial de α a partir do aceito anteriormente
+            alpha = alpha*gTd
+            gTd   = dot_product(gx, d)
+            alpha = alpha/gTd
 
             ! Condição de Armijo
             fxd = f(x + alpha*d)

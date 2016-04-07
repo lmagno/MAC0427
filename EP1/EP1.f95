@@ -27,12 +27,13 @@ program EP1
     
     gamma = 1e-4
     ! eps   = epsilon(0.d0)
-    eps = 1e-4
+    eps = 1e-7
     print '(3A)', "nprob     ", "name                          ", "‖∇f(x₀)‖  "
     do nprob = 1, 18
         ! Cria novo processo
         p = fork()
         if (p == 0) then
+           ! Processo filho
            call setprob(nprob)
            ntries = gettries()
            factor = 1.d0
@@ -55,7 +56,9 @@ program EP1
            call exit(0)
         else
            ! Espera o processo filho terminar
-           p = wait(s)
         end if
+     end do
+     do nprob = 1, 18
+        p = wait(s)
      end do
 end program EP1
