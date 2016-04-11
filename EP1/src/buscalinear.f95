@@ -17,10 +17,10 @@ contains
                 double precision             :: f
             end function f
 
-            function g(x)
-                double precision, intent(in) :: x(:)
-                double precision             :: g(size(x))
-            end function g
+            subroutine g(gx, x)
+                double precision, intent(out) :: gx(:)
+                double precision, intent(in)  :: x(:)
+            end subroutine g
         end interface
 
         ! Saída
@@ -38,17 +38,19 @@ contains
         double precision              :: fx      ! f(x)
         double precision, allocatable :: gx(:)   ! g(x)
         double precision              :: gTd     ! gᵀ(x)d
+        double precision, allocatable :: xd(:)
         double precision              :: fxd     ! f(x + alpha*d)
 
         ! Aloca
         n = size(x0)
         allocate( d(n))
+        allocate(xd(n))
         allocate(gx(n))
 
         ! Valores iniciais
         x  = x0
         fx = f(x)
-        gx = g(x)
+        call g(gx, x)
 
         alpha = 1.d0
         gTd   = -norm2(gx)
@@ -63,7 +65,8 @@ contains
             alpha = alpha/gTd
 
             ! Condição de Armijo
-            fxd = f(x + alpha*d)
+            xd  = x + alpha*d
+            fxd = f(xd)
             do while (fxd > fx + alpha*gamma*gTd)
                 ! Aproximação quadrática de f perto de x ao longo de d:
                 !     q(alpha) = a*alpha^2 + b*alpha + c
@@ -84,17 +87,19 @@ contains
                     alpha = min
                 end if
 
-                fxd = f(x + alpha*d)
+                xd  = x + alpha*d
+                fxd = f(xd)
             end do
 
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 4 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             x  = x + alpha*d
             fx = f(x)
-            gx = g(x)
+            call g(gx, x)
         end do
 
         ! Libera a memória
         deallocate(d)
+        deallocate(xd)
         deallocate(gx)
     end subroutine maximaDescida
 
@@ -111,15 +116,15 @@ contains
                 double precision             :: f
             end function f
 
-            function g(x)
-                double precision, intent(in) :: x(:)
-                double precision             :: g(size(x))
-            end function g
+            subroutine g(gx, x)
+                double precision, intent(out) :: gx(:)
+                double precision, intent(in)  :: x(:)
+            end subroutine g
 
-            function h(x)
-                double precision, intent(in) :: x(:)
-                double precision             :: h(size(x), size(x))
-            end function h
+            subroutine h(hx, x)
+                double precision, intent(out) :: hx(:, :)
+                double precision, intent(in)  :: x(:)
+            end subroutine h
         end interface
 
         ! Saída
@@ -139,6 +144,7 @@ contains
         ! Variáveis para evitar chamadas de função desnecessárias
         double precision              :: fx      ! f(x)
         double precision, allocatable :: gx(:)   ! g(x)
+        double precision, allocatable :: xd(:)
         double precision, allocatable :: hx(:,:) ! h(x)
         double precision              :: gTd     ! gᵀ(x)d
         double precision              :: fxd     ! f(x + alpha*d)
@@ -148,17 +154,18 @@ contains
         allocate( d(n))
         allocate( p(n))
         allocate(gx(n))
+        allocate(xd(n))
         allocate(hx(n, n))
 
         ! Valores iniciais
         x  = x0
         fx = f(x)
-        gx = g(x)
+        call g(gx, x)
 
         do while (norm2(gx) > eps)
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             ! Direção de Newton
-            hx = h(x)
+            call h(hx, x)
             d = -gx
             status = lucol(n, hx, p)
             if (status == -1) then
@@ -173,7 +180,9 @@ contains
 
             ! Condição de Armijo
             alpha = 1.d0
-            fxd = f(x + alpha*d)
+
+            xd  = x + alpha*d
+            fxd = f(xd)
             do while (fxd > fx + alpha*gamma*gTd)
                 ! Aproximação quadrática de f perto de x ao longo de d:
                 !     q(alpha) = a*alpha^2 + b*alpha + c
@@ -194,18 +203,20 @@ contains
                     alpha = min
                 end if
 
-                fxd = f(x + alpha*d)
+                xd  = x + alpha*d
+                fxd = f(xd)
             end do
 
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 4 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             x  = x + alpha*d
             fx = f(x)
-            gx = g(x)
+            call g(gx, x)
         end do
 
         ! Libera a memória
         deallocate(d)
         deallocate(p)
+        deallocate(xd)
         deallocate(hx)
         deallocate(gx)
     end subroutine newton

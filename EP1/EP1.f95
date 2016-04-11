@@ -29,36 +29,61 @@ program EP1
     ! eps   = epsilon(0.d0)
     eps = 1e-7
     print '(3A)', "nprob     ", "name                          ", "‖∇f(x₀)‖  "
-    do nprob = 1, 18
+    do nprob = 1, 1
         ! Cria novo processo
         p = fork()
         if (p == 0) then
-           ! Processo filho
-           call setprob(nprob)
-           ntries = gettries()
-           factor = 1.d0
+            ! Processo filho
+            call setprob(nprob)
+            ntries = gettries()
+            factor = 1.d0
 
-           do ntry = 1, 1
-              name = getname()
-              n    = getdim()
-              x0   = getinit(factor)
-              allocate(x(n))
+            name = getname()
+            n    = getdim()
 
-              call newton(x, x0, f, g, h, gamma, eps)
-              print '(i2, 2A, e8.2, 2i10)', nprob, "        ", name, norm2(g(x)), nfev(), ngev()
+            allocate( x(n))
+            allocate(x0(n))
+            call getinit(x0, factor)
 
-              deallocate(x)
-              deallocate(x0)
+            call maximaDescida(x, x0, f, g, gamma, eps)
+            call g(x0, x)
+            print '(i2, 2A, e8.2, 2i10)', nprob, "        ", name, norm2(x0), nfev(), ngev()
 
-              factor = 10*factor
-           end do
+            deallocate(x)
+            deallocate(x0)
 
-           call exit(0)
-        else
-           ! Espera o processo filho terminar
+            call exit(0)
         end if
-     end do
-     do nprob = 1, 18
+
+        ! Espera o processo filho terminar
         p = wait(s)
+
+        p = fork()
+        if (p == 0) then
+            ! Processo filho
+            call setprob(nprob)
+            ntries = gettries()
+            factor = 1.d0
+
+            name = getname()
+            n    = getdim()
+            allocate( x(n))
+            allocate(x0(n))
+
+            call getinit(x0, factor)
+
+            call newton(x, x0, f, g, h, gamma, eps)
+            call g(x0, x)
+            print '(i2, 2A, e8.2, 3i10)', nprob, "        ", name, norm2(x0), nfev(), ngev(), nhev()
+
+            deallocate(x)
+            deallocate(x0)
+
+            call exit(0)
+        end if
+
+        ! Espera o processo filho terminar
+        p = wait(s)
+
      end do
 end program EP1

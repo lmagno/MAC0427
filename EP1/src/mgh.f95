@@ -61,12 +61,12 @@ contains
         getname = names(nprob)
     end function getname
 
-    function getinit(factor)
-        double precision, intent(in)  :: factor
-        double precision              :: getinit(n)
+    subroutine getinit(x0, factor)
+        double precision, intent(inout) :: x0(:)
+        double precision, intent(in)    :: factor
 
-        call INITPT(n, getinit, nprob, factor)
-    end function getinit
+        call INITPT(n, x0, nprob, factor)
+    end subroutine getinit
 
     function f(x)
         double precision, intent(in) :: x(:)
@@ -80,36 +80,36 @@ contains
         end if
     end function f
 
-    function g(x)
-      double precision, intent(in) :: x(:)
-      double precision             :: g(size(x))
+    subroutine g(gx, x)
+      double precision, intent(out) :: gx(:)
+      double precision, intent(in)  :: x(:)
 
-      call GRDFCN(n, x, g, nprob)
+      call GRDFCN(n, x, gx, nprob)
       ng = ng + 1
-    end function g
+  end subroutine g
 
-    function h(x)
-      double precision, intent(in) :: x(:)
-      double precision             :: h(size(x), size(x))
+    subroutine h(hx, x)
+        double precision, intent(out) :: hx(:, :)
+        double precision, intent(in)  :: x(:)
 
-      integer                      :: i, j
-      double precision             :: hesd(size(x))
-      double precision             :: hesl(size(x)*(size(x)-1)/2)
-      double precision             :: hij
+        integer                      :: i, j
+        double precision             :: hesd(n)
+        double precision             :: hesl(n*(n-1)/2)
+        double precision             :: hij
 
-      call HESFCN(n, x, hesd, hesl, nprob)
+        call HESFCN(n, x, hesd, hesl, nprob)
 
-      ! Constroi a hessiana
-      do j = 1, n
-          h(j, j) = hesd(j)
-          do i = j+1, n
-              hij     = hesl((i-1)*(i-2)/2 + j)
-              h(i, j) = hij
-              h(j, i) = hij
-          end do
-      end do
-      nh = nh + 1
-    end function h
+        ! Constroi a hessiana
+        do j = 1, n
+            hx(j, j) = hesd(j)
+            do i = j+1, n
+                hij     = hesl((i-1)*(i-2)/2 + j)
+                hx(i, j) = hij
+                hx(j, i) = hij
+            end do
+        end do
+        nh = nh + 1
+  end subroutine h
 
     function nfev()
         integer :: nfev
