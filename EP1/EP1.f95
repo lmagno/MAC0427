@@ -1,6 +1,6 @@
 program EP1
-    use BuscaLinear, only: maximaDescida
-    use MGH,         only: setprob, getdim, gettries, getname, getinit, f, g, nfev, ngev
+    use BuscaLinear, only: maximaDescida, newton
+    use MGH,         only: setprob, getdim, gettries, getname, getinit, f, g, h, nfev, ngev, nhev
     implicit none
 
     integer                       :: p, s
@@ -13,9 +13,9 @@ program EP1
     ! Chamadas do sistema para criar processos independentes
     ! Útil para matar uma conta específica sem afetar as outras
     interface
-       function fork() bind(C) 
+       function fork() bind(C)
          use iso_c_binding, only: c_int
-         integer(c_int) :: fork 
+         integer(c_int) :: fork
        end function fork
 
        function wait(i) bind(C)
@@ -24,7 +24,7 @@ program EP1
          integer(c_int)        :: wait
        end function wait
     end interface
-    
+
     gamma = 1e-4
     ! eps   = epsilon(0.d0)
     eps = 1e-7
@@ -37,19 +37,19 @@ program EP1
            call setprob(nprob)
            ntries = gettries()
            factor = 1.d0
-           
+
            do ntry = 1, 1
               name = getname()
               n    = getdim()
               x0   = getinit(factor)
               allocate(x(n))
-              
-              call maximaDescida(x, x0, f, g, gamma, eps)
+
+              call newton(x, x0, f, g, h, gamma, eps)
               print '(i2, 2A, e8.2, 2i10)', nprob, "        ", name, norm2(g(x)), nfev(), ngev()
 
               deallocate(x)
               deallocate(x0)
-              
+
               factor = 10*factor
            end do
 

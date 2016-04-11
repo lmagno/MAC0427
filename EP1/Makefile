@@ -6,7 +6,7 @@ OBJ = ./obj/
 MGHSUB    = INITPT OBJFCN GRDFCN HESFCN
 MGHFILES += $(addprefix $(SRC), $(MGHSUB:=.f))
 
-MODNAMES  = buscalinear mgh
+MODNAMES  = buscalinear mgh lu trisys utils
 MODFILES  = $(MODNAMES:=.mod)
 MODFILES := $(addprefix $(OBJ), $(MODFILES))
 
@@ -32,6 +32,12 @@ clean:
 
 $(OBJ)$(TARGET).o: $(TARGET).f95 $(MODFILES)
 	$(FC) -I$(OBJ) -c $< -o $@
+
+$(OBJ)buscalinear.o $(OBJ)buscalinear.mod: $(SRC)buscalinear.f95 $(OBJ)utils.mod $(OBJ)lu.mod
+	$(FC) -J$(OBJ) -c $< -o $(OBJ)buscalinear.o
+
+$(OBJ)lu.o $(OBJ)lu.mod: $(SRC)lu.f95 $(OBJ)utils.mod $(OBJ)trisys.mod
+	$(FC) -J$(OBJ) -c $< -o $(OBJ)lu.o
 
 $(OBJ)%.o $(OBJ)%.mod: $(SRC)%.f95
 	$(FC) -J$(OBJ) -c $< -o $(OBJ)$*.o
