@@ -10,7 +10,7 @@ contains
         double precision, intent(in) :: eps     ! Tolerância
         double precision, intent(in) :: gamma   ! γ > 0, Constante para condição de Armijo
 
-        ! Função e suas derivadas
+        ! Função, gradiente e busca linear
         interface
             function f(x)
                 double precision, intent(in) :: x(:)
@@ -44,16 +44,12 @@ contains
         integer                       :: n       ! Dimensão do problema
         double precision, allocatable :: d(:)    ! Direção
         double precision              :: alpha   ! Passo
-        double precision              :: a, b    ! Coeficientes da aproximação quadrática
-                                                 ! de f
-        double precision :: min
+
 
         ! Variáveis para evitar chamadas de função desnecessárias
-        double precision              :: fx      ! f(x)
         double precision, allocatable :: gx(:)   ! g(x)
         double precision              :: gTd     ! gᵀ(x)d
         double precision, allocatable :: xd(:)
-        double precision              :: fxd     ! f(x + alpha*d)
 
         ! Aloca
         n = size(x0)
@@ -63,13 +59,11 @@ contains
 
         ! Valores iniciais
         x  = x0
-        fx = f(x)
         call g(gx, x)
 
         alpha = 1.d0
         gTd   = -norm2(gx)
         do while (norm2(gx) > eps)
-            !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             ! Máxima descida
             d = -gx
 
@@ -83,7 +77,6 @@ contains
 
             ! Atualiza x com o novo valor
             x  = x + alpha*d
-            fx = f(x)
             call g(gx, x)
         end do
 
@@ -99,7 +92,7 @@ contains
         double precision, intent(in) :: eps     ! Tolerância
         double precision, intent(in) :: gamma   ! γ > 0, Constante para condição de Armijo
 
-        ! Função e suas derivadas
+        ! Função, gradiente, hessiana e busca linear
         interface
             function f(x)
                 double precision, intent(in) :: x(:)
@@ -139,19 +132,15 @@ contains
         double precision, allocatable :: d(:)    ! Direção
         integer,          allocatable :: p(:)    ! Vetor de permutação
         double precision              :: alpha   ! Passo
-        double precision              :: a, b    ! Coeficientes da aproximação quadrática
-                                                 ! de f
-        double precision              :: min
+
         type(Results)                 :: res
         integer                       :: status
 
         ! Variáveis para evitar chamadas de função desnecessárias
-        double precision              :: fx      ! f(x)
-        double precision, allocatable :: gx(:)   ! g(x)
+        double precision, allocatable :: gx(:)   ! ∇f(x)
         double precision, allocatable :: xd(:)
-        double precision, allocatable :: hx(:,:) ! h(x)
-        double precision              :: gTd     ! gᵀ(x)d
-        double precision              :: fxd     ! f(x + alpha*d)
+        double precision, allocatable :: hx(:,:) ! ∇²f(x)
+        double precision              :: gTd     ! ∇ᵀf(x)d
 
         ! Aloca
         n = size(x0)
@@ -163,20 +152,24 @@ contains
 
         ! Valores iniciais
         x  = x0
-        fx = f(x)
         call g(gx, x)
 
         do while (norm2(gx) > eps)
-            !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             ! Direção de Newton
+            !     ∇²fd = -∇f
             call h(hx, x)
             d = -gx
+
+            ! Resolve
+            !    LU = P∇²f
             status = lucol(n, hx, p)
             if (status == -1) then
                 print *, "A hessiana é singular!"
                 call exit(1)
             end if
 
+            ! Resolve
+            !     LUd = -∇f
             status = sscol(n, hx, p, d, res)
             if (status == -1) then
                 call exit(1)
@@ -190,7 +183,6 @@ contains
 
             ! Atualiza x com o novo valor
             x  = x + alpha*d
-            fx = f(x)
             call g(gx, x)
         end do
 
@@ -202,13 +194,13 @@ contains
         deallocate(gx)
     end subroutine newt
 
-    subroutine bfgs(x, x0, f, g, gamma, eps)
+    subroutine bfgs(x, x0, f, g, ls, gamma, eps)
         ! Entrada
         double precision, intent(in) :: x0(:)   ! Ponto inicial
         double precision, intent(in) :: eps     ! Tolerância
         double precision, intent(in) :: gamma   ! γ > 0, Constante para condição de Armijo
 
-        ! Função e suas derivadas
+        ! Função, gradiente e busca linear
         interface
             function f(x)
                 double precision, intent(in) :: x(:)
@@ -219,6 +211,20 @@ contains
                 double precision, intent(out) :: gx(:)
                 double precision, intent(in)  :: x(:)
             end subroutine g
+
+            subroutine ls(alpha, x, d, f, gamma, gTd, xd)
+                double precision, intent(inout) :: alpha
+                double precision, intent(in)    :: x(:), d(:)
+                double precision, intent(in)    :: gamma, gTd
+                double precision, intent(inout) :: xd(:)
+
+                interface
+                    function f(x)
+                        double precision, intent(in) :: x(:)
+                        double precision             :: f
+                    end function f
+                end interface
+            end subroutine ls
         end interface
 
         ! Saída
@@ -228,23 +234,20 @@ contains
         integer                       :: n       ! Dimensão do problema
         double precision, allocatable :: d(:)    ! Direção
         double precision              :: alpha   ! Passo
-        double precision              :: a, b    ! Coeficientes da aproximação quadrática
-                                                 ! de f
-        double precision              :: min
+
         type(Results)                 :: res
         integer                       :: i, j, k
 
         ! Variáveis para evitar chamadas de função desnecessárias
-        double precision              :: fx      ! f(x)
-        double precision, allocatable :: gx(:)   ! g(x)
+        double precision, allocatable :: gx(:)   ! ∇f(x)
         double precision, allocatable :: xd(:)   ! x + αd
-        double precision              :: fxd     ! f(x + αd)
-        double precision, allocatable :: h(:,:)  ! h(x)
-        double precision, allocatable :: p(:)    ! x + αd    - x
-        double precision, allocatable :: q(:)    ! g(x + αd) - g(x)
-        double precision              :: gTd     ! gᵀ(x)d
+        double precision, allocatable :: h(:,:)  ! H(x)
+        double precision, allocatable :: p(:)    !    x + αd  -    x
+        double precision, allocatable :: q(:)    ! ∇f(x + αd) - ∇f(x)
+        double precision              :: gTd     ! ∇ᵀf(x)d
 
         ! Constantes para atualizar a matriz pelo BFGS
+        double precision              :: a
         double precision              :: pTq     ! pᵀq
         double precision              :: qTHq    ! qᵀHq
         double precision              :: pqTHij  ! (pqᵀH)ᵢⱼ
@@ -254,76 +257,48 @@ contains
         n = size(x0)
         allocate( d(n))
         allocate( p(n))
+        allocate( q(n))
         allocate(gx(n))
         allocate(xd(n))
         allocate(h(n, n))
 
         ! Valores iniciais
         x  = x0
-        fx = f(x)
         call g(gx, x)
 
-        ! hx começa sendo a identidade
+        ! h começa sendo a identidade
         h(:, :) = 0.d0
         do i = 1, n
             h(i, i) = 1.d0
         end do
 
-        d(:) = 0.d0
         do while (norm2(gx) > eps)
-            !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             ! Direção de Quasi-Newton
-            ! d = -Hg(x)
+            ! d = -H∇f
+            d(:) = 0.d0
             do j = 1, n
                 do i = 1, n
                     d(i) = d(i) - h(i, j)*gx(j)
                 end do
             end do
+
             gTd = dot_product(gx, d)
 
-            ! Condição de Armijo
+            ! Busca linear
             alpha = 1.d0
+            call ls(alpha, x, d, f, gamma, gTd, xd)
 
-            xd  = x + alpha*d
-            fxd = f(xd)
-            do while (fxd > fx + alpha*gamma*gTd)
-                ! Aproximação quadrática de f perto de x ao longo de d:
-                !     q(alpha) = a*alpha^2 + b*alpha + c
-                ! cujo minimizador é
-                !     alpha = -b/2a
-
-                a = (fxd - fx - alpha*gTd)/(alpha*alpha)
-                b = gTd
-
-                min = -b/(2.d0*a)
-
-                ! Escolhe novo α tal que 0.1α <= α <= 0.9α
-                if (min < 0.1d0*alpha) then
-                    alpha = 0.1d0*alpha
-                else if (min > 0.9*alpha) then
-                    alpha = 0.9d0*alpha
-                else
-                    alpha = min
-                end if
-
-                xd  = x + alpha*d
-                fxd = f(xd)
-            end do
-            ! print *, alpha, norm2(d)
-            !!!!!!!!!!!!!!!!!!!!!!!!!!!!! Passo 4 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            p  = alpha*d
-            q  = gx
+            q = gx
 
             ! Atualiza x
-            x  = xd
-            fx = fxd
+            x  = x + alpha*d
             call g(gx, x)
 
-            ! q = g(x+αd) - g(x)
-            q  = gx - q
-            ! print *, norm2(gx), norm2(p), norm2(q)
-
+            p = alpha*d   ! p =    x + αd  -    x
+            q = gx - q    ! q = ∇f(x + αd) - ∇f(x)
             pTq  = dot_product(p, q)
+
+            ! Atualiza H
             qTHq = 0.d0
             do j = 1, n
                 do i = 1, n
@@ -331,21 +306,73 @@ contains
                 end do
             end do
 
-            a = (1.d0 + qTHq)/pTq
+            a = (1 + qTHq)/pTq
+
+            ! Atualiza a parte triangular inferior de H (sem a diagonal principal)
             do j = 1, n
-                do i = 1, n
+                do i = j+1, n
+                    ! Explora o fato que
+                    !     H = Hᵀ
                     pqTHij = 0.d0
                     HqpTij = 0.d0
 
-                    do k = 1, n
+                    ! Só acessa a parte triangular superior de H (diagonal principal inclusa)
+                    !     i <= j
+                    do k = 1, j
                         pqTHij = pqTHij + p(i)*q(k)*h(k, j)
                     end do
 
-                    do k = 1, n
+                    do k = j+1, n
+                        pqTHij = pqTHij + p(i)*q(k)*h(j, k)
+                    end do
+
+                    do k = 1, j
                         HqpTij = HqpTij + h(i, k)*q(k)*p(j)
                     end do
 
+                    do k = j+1, n
+                        HqpTij = HqpTij + h(k, i)*q(k)*p(j)
+                    end do
+
+                    ! i > j
                     h(i, j) = h(i, j) + (a*p(i)*p(j) - pqTHij - HqpTij)/pTq
+                end do
+            end do
+
+            ! Atualiza a diagonal principal
+            ! Aqui é importante o fato de que o termo Hᵢᵢ só é usado
+            ! na iteração i e, portanto, pode ser alterado sem afetar as seguintes
+            do i = 1, n
+                pqTHij = 0.d0
+                HqpTij = 0.d0
+
+                ! Só acessa a parte triangular superior de H (diagonal principal inclusa)
+                !     i <= j
+                do k = 1, i
+                    pqTHij = pqTHij + p(i)*q(k)*h(k, i)
+                end do
+
+                do k = i+1, n
+                    pqTHij = pqTHij + p(i)*q(k)*h(i, k)
+                end do
+
+                do k = 1, i
+                    HqpTij = HqpTij + h(i, k)*q(k)*p(i)
+                end do
+
+                do k = i+1, n
+                    HqpTij = HqpTij + h(k, i)*q(k)*p(i)
+                end do
+
+                ! i = j
+                h(i, i) = h(i, i) + (a*p(i)*p(i) - pqTHij - HqpTij)/pTq
+            end do
+
+            ! Atualiza a parte triangular superior de H
+            do j = 1, n
+                do i = 1, j-1
+                    ! i < j
+                    h(i, j) = h(j, i)
                 end do
             end do
         end do

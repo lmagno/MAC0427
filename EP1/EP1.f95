@@ -80,6 +80,7 @@ program EP1
 
             call exit(0)
         end if
+
         p = fork()
         if (p == 0) then
             ! Processo filho
@@ -97,6 +98,7 @@ program EP1
 
             call exit(0)
         end if
+
         p = fork()
         if (p == 0) then
             ! Processo filho
@@ -115,8 +117,44 @@ program EP1
             call exit(0)
         end if
 
+        p = fork()
+        if (p == 0) then
+            ! Processo filho
+            call setmethod("bfgsquad")
+
+            call cpu_time(t0)
+            call bfgs(x, x0, f, g, lsquad, gamma, eps)
+            call cpu_time(tf)
+
+            call g(x0, x)
+            print '(a18, e10.2, f11.3, 2i10)', "bfgsquad", norm2(x0), tf-t0, nfev(), ngev()
+
+            deallocate(x)
+            deallocate(x0)
+
+            call exit(0)
+        end if
+
+        p = fork()
+        if (p == 0) then
+            ! Processo filho
+            call setmethod("bfgscube")
+
+            call cpu_time(t0)
+            call bfgs(x, x0, f, g, lscube, gamma, eps)
+            call cpu_time(tf)
+
+            call g(x0, x)
+            print '(a18, e10.2, f11.3, 2i10)', "bfgscube", norm2(x0), tf-t0, nfev(), ngev()
+
+            deallocate(x)
+            deallocate(x0)
+
+            call exit(0)
+        end if
+
         ! Espera os processos filhos terminarem
-        do i = 1, 4
+        do i = 1, 6
             p = wait(s)
         end do
 

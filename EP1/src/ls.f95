@@ -83,7 +83,7 @@ contains
         double precision :: a, b, min
 
         fx = f(x)
-        
+
         ! Tenta o passo inicial
         a0 = alpha
 
