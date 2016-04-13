@@ -1,15 +1,17 @@
 program EP1
-    use BuscaLinear, only: maximaDescida, newton
-    use MGH,         only: setprob, getdim, gettries, getname, getinit, f, g, h, nfev, ngev, nhev
+    use BuscaLinear, only: grad, newt, bfgs
+    use         MGH, only: setprob, setmethod, getdim, gettries, getname, getinit, f, g, h, nfev, ngev, nhev
+    use          ls, only: lsquad, lscube
     implicit none
 
     integer                       :: p, s
-    integer                       :: n, nprob, ntry, ntries
+    integer                       :: n, nprob, ntry, ntries, i
     character(len=30)             :: name
     double precision              :: factor = 1.d0
     double precision, allocatable :: x(:), x0(:)
     double precision              :: gamma, eps
 
+    double precision              :: tf, t0
     ! Chamadas do sistema para criar processos independentes
     ! Útil para matar uma conta específica sem afetar as outras
     interface
@@ -25,56 +27,87 @@ program EP1
        end function wait
     end interface
 
+    print '(18x, a16, a11, a11, a13, a14)', "‖∇f(x)‖", "t (s)", "nº f", "nº ∇f", "nº ∇²f"
     gamma = 1e-4
     ! eps   = epsilon(0.d0)
     eps = 1e-7
-    print '(3A)', "nprob     ", "name                          ", "‖∇f(x₀)‖  "
-    do nprob = 1, 1
+    do nprob = 1, 18
+        call setprob(nprob)
+        ntries = gettries()
+        factor = 1.d0
+
+        name = getname()
+        n    = getdim()
+
+        print '(i2, x, a)', nprob, name
+        allocate( x(n))
+        allocate(x0(n))
+        call getinit(x0, factor)
+
         ! Cria novo processo
         p = fork()
         if (p == 0) then
             ! Processo filho
-            call setprob(nprob)
-            ntries = gettries()
-            factor = 1.d0
+            call setmethod("gradquad")
 
-            name = getname()
-            n    = getdim()
+            call cpu_time(t0)
+            call grad(x, x0, f, g, lsquad, gamma, eps)
+            call cpu_time(tf)
 
-            allocate( x(n))
-            allocate(x0(n))
-            call getinit(x0, factor)
-
-            call maximaDescida(x, x0, f, g, gamma, eps)
             call g(x0, x)
-            print '(i2, 2A, e8.2, 2i10)', nprob, "        ", name, norm2(x0), nfev(), ngev()
+            print '(a18, e10.2, f11.3, 2i10)', "gradquad", norm2(x0), tf-t0, nfev(), ngev()
 
             deallocate(x)
             deallocate(x0)
 
             call exit(0)
         end if
-
-        ! Espera o processo filho terminar
-        p = wait(s)
 
         p = fork()
         if (p == 0) then
             ! Processo filho
-            call setprob(nprob)
-            ntries = gettries()
-            factor = 1.d0
+            call setmethod("gradcube")
 
-            name = getname()
-            n    = getdim()
-            allocate( x(n))
-            allocate(x0(n))
+            call cpu_time(t0)
+            call grad(x, x0, f, g, lscube, gamma, eps)
+            call cpu_time(tf)
 
-            call getinit(x0, factor)
-
-            call newton(x, x0, f, g, h, gamma, eps)
             call g(x0, x)
-            print '(i2, 2A, e8.2, 3i10)', nprob, "        ", name, norm2(x0), nfev(), ngev(), nhev()
+            print '(a18, e10.2, f11.3, 2i10)', "gradcube", norm2(x0), tf-t0, nfev(), ngev()
+
+            deallocate(x)
+            deallocate(x0)
+
+            call exit(0)
+        end if
+        p = fork()
+        if (p == 0) then
+            ! Processo filho
+            call setmethod("newtquad")
+
+            call cpu_time(t0)
+            call newt(x, x0, f, g, h, lsquad, gamma, eps)
+            call cpu_time(tf)
+
+            call g(x0, x)
+            print '(a18, e10.2, f11.3, 2i10)', "newtquad", norm2(x0), tf-t0, nfev(), ngev()
+
+            deallocate(x)
+            deallocate(x0)
+
+            call exit(0)
+        end if
+        p = fork()
+        if (p == 0) then
+            ! Processo filho
+            call setmethod("newtcube")
+
+            call cpu_time(t0)
+            call newt(x, x0, f, g, h, lscube, gamma, eps)
+            call cpu_time(tf)
+
+            call g(x0, x)
+            print '(a18, e10.2, f11.3, 3i10)', "newtcube", norm2(x0), tf-t0, nfev(), ngev(), nhev()
 
             deallocate(x)
             deallocate(x0)
@@ -82,8 +115,12 @@ program EP1
             call exit(0)
         end if
 
-        ! Espera o processo filho terminar
-        p = wait(s)
+        ! Espera os processos filhos terminarem
+        do i = 1, 4
+            p = wait(s)
+        end do
 
+        deallocate(x)
+        deallocate(x0)
      end do
 end program EP1

@@ -7,6 +7,7 @@ module MGH
     integer :: nf, ng, nh
 
     integer :: nprobs  = 18
+    character(len=8) :: method
     integer,           dimension(18) :: vn      = (/ 3, 6, 3, 2, 3, 4, 10, 2, 2, 2, 4, 3, 2, 12, 4, 2, 4, 2/)
     integer,           dimension(18) :: vntries = (/ 2, 2, 2, 3, 2, 4,  4, 2, 2, 5, 2, 2, 2,  5, 2, 2, 4, 2/)
     character(len=30), dimension(18) :: names   = [character(len=30) :: &
@@ -29,7 +30,7 @@ module MGH
                                                    "Wood", &
                                                    "Chebyquad"]
 
-    public :: setprob, getdim, gettries, getname, getinit, f, g, h, nfev, ngev, nhev
+    public :: setprob, setmethod, getdim, gettries, getname, getinit, f, g, h, nfev, ngev, nhev
 contains
     subroutine setprob(i)
         integer, intent(in)  :: i
@@ -42,6 +43,12 @@ contains
         ng = 0
         nh = 0
     end subroutine setprob
+
+    subroutine setmethod(name)
+        character(len=*) :: name
+
+        method = name
+    end subroutine setmethod
 
     function getdim()
         integer             :: getdim
@@ -75,7 +82,7 @@ contains
         call OBJFCN(n, x, f, nprob)
         nf = nf + 1
         if (nf > 1000000) then
-            print '(i2, 3A)', nprob, "        ", names(nprob), "FC"
+            print '(a18, a10)', method, "FC"
             call exit(1)
         end if
     end function f
