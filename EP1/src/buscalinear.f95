@@ -1,6 +1,6 @@
 module BuscaLinear
-    use  utils, only: Results
-    use     lu, only: lucol, sscol
+    use   trisys, only: backcol, forwcol
+    use cholesky, only: cholcol
     implicit none
 
 contains
@@ -132,14 +132,16 @@ contains
         double precision, allocatable :: d(:)    ! Direção
         integer,          allocatable :: p(:)    ! Vetor de permutação
         double precision              :: alpha   ! Passo
+        double precision              :: rho     ! Constante para shift nos autovalores
+                                                 ! da hessiana
 
-        type(Results)                 :: res
-        integer                       :: status
+        integer                       :: i, status
 
         ! Variáveis para evitar chamadas de função desnecessárias
         double precision, allocatable :: gx(:)   ! ∇f(x)
         double precision, allocatable :: xd(:)
         double precision, allocatable :: hx(:,:) ! ∇²f(x)
+        double precision, allocatable :: hr(:,:) ! ∇²f(x) + ρI
         double precision              :: gTd     ! ∇ᵀf(x)d
 
         ! Aloca
@@ -149,28 +151,49 @@ contains
         allocate(gx(n))
         allocate(xd(n))
         allocate(hx(n, n))
+        allocate(hr(n, n))
 
         ! Valores iniciais
         x  = x0
         call g(gx, x)
 
         do while (norm2(gx) > eps)
-            ! Direção de Newton
-            !     ∇²fd = -∇f
+            ! Calcula fator de Cholesky de uma aproximação
+            ! definida positiva da hessiana
+            !     GGᵀ = ∇²f(x) + ρI
             call h(hx, x)
-            d = -gx
 
-            ! Resolve
-            !    LU = P∇²f
-            status = lucol(n, hx, p)
+            ! Verifica se a própria hessiana não é definida positiva
+            hr  = hx
+            status = cholcol(n, hr)
+
+            rho = 1e-3
+            do while (status == -1)
+                ! Não é definida positiva
+
+                ! Faz shift nos autovalores e tenta novamente
+                ! hr = ∇²f(x) + ρI
+                hr = hx
+                do i = 1, n
+                    hr(i, i) = hr(i, i) + rho
+                end do
+
+                status = cholcol(n, hr)
+                rho = 10*rho
+            end do
+
+            d = -gx
+            ! Resolve Gᵀd solução da equação
+            !    GGᵀd = -∇f(x)
+            status = forwcol(n, hr, d, unit = .false.)
             if (status == -1) then
                 print *, "A hessiana é singular!"
                 call exit(1)
             end if
 
-            ! Resolve
-            !     LUd = -∇f
-            status = sscol(n, hx, p, d, res)
+            ! Resolve d solução da equação
+            !     Gᵀd = -G⁻¹∇f
+            status = backcol(n, hr, d, trans = .true.)
             if (status == -1) then
                 call exit(1)
             end if
@@ -190,8 +213,9 @@ contains
         deallocate(d)
         deallocate(p)
         deallocate(xd)
-        deallocate(hx)
         deallocate(gx)
+        deallocate(hx)
+        deallocate(hr)
     end subroutine newt
 
     subroutine bfgs(x, x0, f, g, ls, gamma, eps)
@@ -235,7 +259,6 @@ contains
         double precision, allocatable :: d(:)    ! Direção
         double precision              :: alpha   ! Passo
 
-        type(Results)                 :: res
         integer                       :: i, j, k
 
         ! Variáveis para evitar chamadas de função desnecessárias
