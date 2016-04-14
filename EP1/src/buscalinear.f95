@@ -86,11 +86,13 @@ contains
         deallocate(gx)
     end subroutine grad
 
-    subroutine newt(x, x0, f, g, h, ls, gamma, eps)
+    subroutine newt(x, x0, f, g, h, ls, gamma, sigma, theta, eps)
         ! Entrada
         double precision, intent(in) :: x0(:)   ! Ponto inicial
         double precision, intent(in) :: eps     ! Tolerância
         double precision, intent(in) :: gamma   ! γ > 0, Constante para condição de Armijo
+        double precision, intent(in) :: sigma   ! σ > 0, constante para condição da norma
+        double precision, intent(in) :: theta   ! Θ > 0, constante para condição do ângulo
 
         ! Função, gradiente, hessiana e busca linear
         interface
@@ -135,7 +137,7 @@ contains
         double precision              :: rho     ! Constante para shift nos autovalores
                                                  ! da hessiana
 
-        integer                       :: i, status
+        integer                       :: i, status, tmp
 
         ! Variáveis para evitar chamadas de função desnecessárias
         double precision, allocatable :: gx(:)   ! ∇f(x)
@@ -143,6 +145,8 @@ contains
         double precision, allocatable :: hx(:,:) ! ∇²f(x)
         double precision, allocatable :: hr(:,:) ! ∇²f(x) + ρI
         double precision              :: gTd     ! ∇ᵀf(x)d
+        double precision              :: ng      ! ‖∇f(x)‖
+        double precision              :: nd      ! ‖d‖
 
         ! Aloca
         n = size(x0)
@@ -166,11 +170,25 @@ contains
             ! Verifica se a própria hessiana não é definida positiva
             hr  = hx
             status = cholcol(n, hr)
+            if (status == 0) then
+                ! É definida positiva
 
+                d = -gx
+                ! Resolve Gᵀd solução da equação
+                !    GGᵀd = -∇f(x)
+                tmp = forwcol(n, hr, d, unit = .false.)
+
+                ! Resolve d solução da equação
+                !     Gᵀd = -G⁻¹∇f
+                tmp = backcol(n, hr, d, trans = .true.)
+            end if
+            ng  = norm2(gx)
+            nd  = norm2(d)
+            gTd = dot_product(gx, d)
             rho = 1e-3
-            do while (status == -1)
-                ! Não é definida positiva
 
+            ! Condição do ângulo
+            do while (status == -1 .or. gTd > -theta*ng*nd)
                 ! Faz shift nos autovalores e tenta novamente
                 ! hr = ∇²f(x) + ρI
                 hr = hx
@@ -179,23 +197,28 @@ contains
                 end do
 
                 status = cholcol(n, hr)
+                if (status == 0) then
+                    ! É definida positiva
+
+                    d = -gx
+                    ! Resolve Gᵀd solução da equação
+                    !    GGᵀd = -∇f(x)
+                    tmp = forwcol(n, hr, d, unit = .false.)
+
+                    ! Resolve d solução da equação
+                    !     Gᵀd = -G⁻¹∇f
+                    tmp = backcol(n, hr, d, trans = .true.)
+                end if
+
+                ng  = norm2(gx)
+                nd  = norm2(d)
+                gTd = dot_product(gx, d)
                 rho = 10*rho
             end do
 
-            d = -gx
-            ! Resolve Gᵀd solução da equação
-            !    GGᵀd = -∇f(x)
-            status = forwcol(n, hr, d, unit = .false.)
-            if (status == -1) then
-                print *, "A hessiana é singular!"
-                call exit(1)
-            end if
-
-            ! Resolve d solução da equação
-            !     Gᵀd = -G⁻¹∇f
-            status = backcol(n, hr, d, trans = .true.)
-            if (status == -1) then
-                call exit(1)
+            ! Condição da norma
+            if (nd < sigma*ng) then
+                d = sigma*ng/nd*d
             end if
 
             gTd = dot_product(gx, d)
@@ -218,11 +241,13 @@ contains
         deallocate(hr)
     end subroutine newt
 
-    subroutine bfgs(x, x0, f, g, ls, gamma, eps)
+    subroutine bfgs(x, x0, f, g, ls, gamma, sigma, theta, eps)
         ! Entrada
         double precision, intent(in) :: x0(:)   ! Ponto inicial
         double precision, intent(in) :: eps     ! Tolerância
-        double precision, intent(in) :: gamma   ! γ > 0, Constante para condição de Armijo
+        double precision, intent(in) :: gamma   ! γ > 0, constante para condição de Armijo
+        double precision, intent(in) :: sigma   ! σ > 0, constante para condição da norma
+        double precision, intent(in) :: theta   ! Θ > 0, constante para condição do ângulo
 
         ! Função, gradiente e busca linear
         interface
@@ -262,13 +287,15 @@ contains
         integer                       :: i, j, k
 
         ! Variáveis para evitar chamadas de função desnecessárias
-        double precision, allocatable :: gx(:)   ! ∇f(x)
-        double precision, allocatable :: xd(:)   ! x + αd
-        double precision, allocatable :: h(:,:)  ! H(x)
-        double precision, allocatable :: p(:)    !    x + αd  -    x
-        double precision, allocatable :: q(:)    ! ∇f(x + αd) - ∇f(x)
-        double precision              :: gTd     ! ∇ᵀf(x)d
-
+        double precision, allocatable :: gx(:)    ! ∇f(x)
+        double precision, allocatable :: xd(:)    ! x + αd
+        double precision, allocatable :: h(:,:)   ! H(x)
+        double precision, allocatable :: eye(:,:) ! I
+        double precision, allocatable :: p(:)     !    x + αd  -    x
+        double precision, allocatable :: q(:)     ! ∇f(x + αd) - ∇f(x)
+        double precision              :: gTd      ! ∇ᵀf(x)d
+        double precision              :: ng       ! ‖∇f(x)‖
+        double precision              :: nd       ! ‖d‖
         ! Constantes para atualizar a matriz pelo BFGS
         double precision              :: a
         double precision              :: pTq     ! pᵀq
@@ -283,19 +310,22 @@ contains
         allocate( q(n))
         allocate(gx(n))
         allocate(xd(n))
+        allocate(eye(n, n))
         allocate(h(n, n))
 
         ! Valores iniciais
         x  = x0
         call g(gx, x)
+        ng = norm2(gx)
 
         ! h começa sendo a identidade
-        h(:, :) = 0.d0
+        eye(:, :) = 0.d0
         do i = 1, n
-            h(i, i) = 1.d0
+            eye(i, i) = 1.d0
         end do
 
-        do while (norm2(gx) > eps)
+        h = eye
+        do while (ng > eps)
             ! Direção de Quasi-Newton
             ! d = -H∇f
             d(:) = 0.d0
@@ -304,8 +334,23 @@ contains
                     d(i) = d(i) - h(i, j)*gx(j)
                 end do
             end do
+            nd = norm2(d)
+
+            ! Condição da norma
+            if (nd < sigma*ng) then
+                d = sigma*ng/nd*d
+                nd = norm2(d)
+            end if
 
             gTd = dot_product(gx, d)
+            
+            ! Condição do ângulo
+            if (gTd > -theta*ng*nd) then
+                h = eye
+
+                ! Vai pra próxima iteração
+                cycle
+            end if
 
             ! Busca linear
             alpha = 1.d0
@@ -316,6 +361,7 @@ contains
             ! Atualiza x
             x  = x + alpha*d
             call g(gx, x)
+            ng = norm2(gx)
 
             p = alpha*d   ! p =    x + αd  -    x
             q = gx - q    ! q = ∇f(x + αd) - ∇f(x)
@@ -329,7 +375,7 @@ contains
                 end do
             end do
 
-            a = (1 + qTHq)/pTq
+            a = (pTq + qTHq)/pTq
 
             ! Atualiza a parte triangular inferior de H (sem a diagonal principal)
             do j = 1, n
@@ -406,6 +452,7 @@ contains
         deallocate(q)
         deallocate(xd)
         deallocate(h)
+        deallocate(eye)
         deallocate(gx)
     end subroutine bfgs
 end module BuscaLinear

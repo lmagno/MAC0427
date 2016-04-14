@@ -9,7 +9,7 @@ program EP1
     character(len=30)             :: name
     double precision              :: factor = 1.d0
     double precision, allocatable :: x(:), x0(:)
-    double precision              :: gamma, eps
+    double precision              :: gamma, sigma, theta, eps
 
     double precision              :: tf, t0
     ! Chamadas do sistema para criar processos independentes
@@ -29,8 +29,11 @@ program EP1
 
     print '(18x, a16, a11, a11, a13, a14)', "‖∇f(x)‖", "t (s)", "nº f", "nº ∇f", "nº ∇²f"
     gamma = 1e-4
+    sigma = 1e-4
+    theta = 1e-5
+
     ! eps   = epsilon(0.d0)
-    eps = 1e-7
+    eps = 1e-5
     do nprob = 1, 18
         call setprob(nprob)
         ntries = gettries()
@@ -87,11 +90,11 @@ program EP1
             call setmethod("newtquad")
 
             call cpu_time(t0)
-            call newt(x, x0, f, g, h, lsquad, gamma, eps)
+            call newt(x, x0, f, g, h, lsquad, gamma, sigma, theta, eps)
             call cpu_time(tf)
 
             call g(x0, x)
-            print '(a18, e10.2, f11.3, 2i10)', "newtquad", norm2(x0), tf-t0, nfev(), ngev()
+            print '(a18, e10.2, f11.3, 3i10)', "newtquad", norm2(x0), tf-t0, nfev(), ngev(), nhev()
 
             deallocate(x)
             deallocate(x0)
@@ -105,7 +108,7 @@ program EP1
             call setmethod("newtcube")
 
             call cpu_time(t0)
-            call newt(x, x0, f, g, h, lscube, gamma, eps)
+            call newt(x, x0, f, g, h, lscube, gamma, sigma, theta, eps)
             call cpu_time(tf)
 
             call g(x0, x)
@@ -123,7 +126,7 @@ program EP1
             call setmethod("bfgsquad")
 
             call cpu_time(t0)
-            call bfgs(x, x0, f, g, lsquad, gamma, eps)
+            call bfgs(x, x0, f, g, lsquad, gamma, sigma, theta, eps)
             call cpu_time(tf)
 
             call g(x0, x)
@@ -141,7 +144,7 @@ program EP1
             call setmethod("bfgscube")
 
             call cpu_time(t0)
-            call bfgs(x, x0, f, g, lscube, gamma, eps)
+            call bfgs(x, x0, f, g, lscube, gamma, sigma, theta, eps)
             call cpu_time(tf)
 
             call g(x0, x)
