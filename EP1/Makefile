@@ -49,5 +49,6 @@ clean:
 
 tex:
 	mkdir -p $(AUX); \
-	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)$(TARGET).tex; \
+	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)$(TARGET).tex && \
+	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)$(TARGET).tex && \
 	mv $(AUX)$(TARGET).pdf ./

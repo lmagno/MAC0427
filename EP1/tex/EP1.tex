@@ -1,25 +1,17 @@
 \documentclass[a4paper,11pt]{article}
-\usepackage{listingsutf8}
-\usepackage{color}
-\usepackage{scalefnt}
-\usepackage{cancel}
-\usepackage{picinpar}
-\usepackage{subfigure}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 \usepackage{graphicx}
-\usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage[brazilian]{babel}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{setspace}
-\usepackage{caption}
-\usepackage[left=2.5cm,right=2.5cm,top=1.0cm,bottom=1.5cm]{geometry}
-\usepackage{siunitx}
-\usepackage[hidelinks=true,linkcolor=black,linktoc=all]{hyperref}
+\usepackage[left=2.5cm,right=2.5cm,top=2.0cm,bottom=1.5cm]{geometry}
+\usepackage[hidelinks]{hyperref}
 \usepackage{indentfirst}
-\usepackage[nottoc]{tocbibind}
-\usepackage{natbib}
-\usepackage{mdwlist} % Compact lists
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{txfonts} % Para usar o símbolo dos números reais (\varmathbb{R})
 
 \date{}
 \author{Lucas Magno \\ 7994983}
@@ -27,4 +19,105 @@
 
 \begin{document}
     \maketitle
+
+    \section*{Introdução}
+    \section*{Otimização Irrestrita}
+        Dado $f: \varmathbb{R}^n \rightarrow \varmathbb{R}$, um problema de
+        otimização irrestrita pode ser escrito
+        \begin{equation*}
+            \begin{aligned}
+                & \text{minimizar} & & f(x) \\
+                & \text{sujeito a} & & x \in \varmathbb{R}^n \\
+            \end{aligned}
+        \end{equation*}
+        ou seja, queremos encontrar $x^*$ que minimize $f$ (dito minimizador), o que pode se dar em duas formas:
+        \begin{itemize}
+            \item Minimizador global
+            \begin{align*}
+                     f(x^*) \leq f(x) \quad & \forall x \in \varmathbb{R}^n \\
+                     %
+                     \intertext{\item Minimizador local}
+                     %
+                     f(x^*) \leq f(x) \quad & \forall x \mid \|x - x^*\| \leq \epsilon \\
+                    \intertext{para algum $\epsilon > 0$ (isto é, existe uma vizinhança na qual $f(x^*)$ tem valor mínimo).}
+            \end{align*}
+        \end{itemize}
+
+        Analogamente a problemas unidimensionais, sendo $f$ diferenciável, pode-se mostrar que, se $x^*$ é um minimizador
+        (local ou global), então
+            $$ \nabla f(x^*) = 0 $$
+        o que nos dá uma forma de encontrar os minimizadores, pois basta encontrar os pontos que anulam o gradiente (dito estacionários).
+        No entanto, de forma geral, não temos como determinar localmente se um ponto é mínimo global, então os métodos implementados se contentarão
+        em encontrar mínimos locais (sejam eles globais ou não).
+
+    \newpage
+    \section*{Busca Linear}
+        Os métodos utilizados neste trabalho seguem todos o mesmo paradigma: a \emph{busca linear}.
+        Tal paradigma consiste basicamente em se escolher, a partir de um ponto $x$, uma direção de busca $d$ e então escolher
+        um passo $\alpha$ nessa direção, de forma que o valor da função $f$ que queremos
+        minimizar diminua adequadamente (cujo significado será discutido adiante).
+
+        Ou seja, a forma básica da busca linear é (dado $x^0$):
+        \begin{algorithm}[h]
+            \caption{Busca Linear}
+            \label{alg:ls}
+            \begin{algorithmic}[1]
+                \State $k \gets 0$
+                \While {$\nabla f(x^k) \neq 0$}
+                    \State Escolher $d^k \in \varmathbb{R}^n$ tal que $\nabla f(x^k)^\top d^k < 0$
+                    \State Escolher $\alpha_k \in \varmathbb{R}$\,\, tal que $f(x^k + \alpha_k d^k) < f(x^k)$
+                    \State $x^{k+1} \gets x^k + \alpha_k d^k$
+                    \State $k \gets k + 1$
+                \EndWhile
+            \end{algorithmic}
+        \end{algorithm}
+
+        Em que a linha 4 impõe o decréscimo da função e a 5 é a atualização da iteração.
+        A linha 3, entretanto, introduz a condição
+            $$ \nabla f(x^k)^\top d^k < 0 $$
+        cuja motivação pode ser vista através da expansão em Taylor da função:
+            $$ f(x + \alpha d) = f(x) + \alpha\nabla f(x)^\top d + \frac{1}{2}\alpha^2d^\top\nabla^2 f(x)d + o(\|\alpha d\|^2)  $$
+        assim, sempre podemos escolher um passo $\alpha$ suficientemente pequeno tal que o termo de primeira ordem domine os seguintes
+        e, por ele ser negativo (restringindo $\alpha > 0$), vale que
+            $$ f(x + \alpha d) < f(x) $$
+
+        Portanto, direções que satisfaçam essa condição garantem que seja sempre possível descrescer o valor da função e por isso
+        são chamadas de \emph{direções de descida}.
+
+        Esse algoritmo gera a sequência
+            $$ \{x^k\}_{k = 0}^\infty $$
+        para a qual \emph{esperaríamos} que valesse
+            $$ \underset{k \rightarrow \infty}{lim} x^k = x^*$$
+        mas não é o caso, pois, dados
+            \begin{align*}
+                f(x) &= {x}^2 \\
+                x^k  &= 1 + \frac{1}{k} \\
+                d^k  &= -1
+            \end{align*}
+        para todo $k > 0$ e notando que $x^{k+1} < x^{k}$, temos
+        \begin{align*}
+            \alpha_k &= x^k - x^{k+1}  & &> 0 \\
+            \nabla f(x^k)^\top d^k &= -2x^k & &< 0 \quad \forall x > 0 \\
+            f(x^{k+1}) - f(x^k) &= (x^{k+1})^2 - (x^{k})^2 & &< 0
+        \end{align*}
+
+        Logo, essa é uma sequência perfeitamente válida ao que concerne o algoritmo \ref{alg:ls} e apesar disso é fácil notar que
+            $$ \underset{k \rightarrow \infty}{lim} x^k = 1$$
+        que não é nem ponto estacionário de $f$, então essas condições não são suficientes para garantir a convergência do algoritmo.
+    \section*{Condições}
+        O algoritmo \ref{alg:ls}
+
+        \subsection*{Condição de Armijo}
+        \subsection*{Condição da Norma}
+        \subsection*{Condição do Ângulo}
+    \section*{Métodos}
+        A principal diferença entre estes métodos, então, está na forma como a direção $d$ é escolhida.
+
+        \subsection*{Método do Gradiente}
+        \subsection*{Método de Newton}
+        \subsection*{Método BFGS}
+    \section*{Implementação}
+    \section*{Execução}
+    \section*{Conclusão}
+
 \end{document}
