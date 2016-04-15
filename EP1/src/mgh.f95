@@ -4,10 +4,8 @@ module MGH
 
     private
     integer :: n, nprob, ntries
-    integer :: nf, ng, nh
 
     integer :: nprobs  = 18
-    character(len=8) :: method
     integer,           dimension(18) :: vn      = (/ 3, 6, 3, 2, 3, 4, 10, 2, 2, 2, 4, 3, 2, 12, 4, 2, 4, 2/)
     integer,           dimension(18) :: vntries = (/ 2, 2, 2, 3, 2, 4,  4, 2, 2, 5, 2, 2, 2,  5, 2, 2, 4, 2/)
     character(len=30), dimension(18) :: names   = [character(len=30) :: &
@@ -30,7 +28,7 @@ module MGH
                                                    "Wood", &
                                                    "Chebyquad"]
 
-    public :: setprob, setmethod, getdim, gettries, getname, getinit, f, g, h, nfev, ngev, nhev
+    public :: setprob, getdim, gettries, getname, getinit, mgh_f, mgh_g, mgh_h
 contains
     subroutine setprob(i)
         integer, intent(in)  :: i
@@ -38,17 +36,7 @@ contains
         n      = vn(i)
         nprob  = i
         ntries = vntries(i)
-
-        nf = 0
-        ng = 0
-        nh = 0
     end subroutine setprob
-
-    subroutine setmethod(name)
-        character(len=*) :: name
-
-        method = name
-    end subroutine setmethod
 
     function getdim()
         integer             :: getdim
@@ -75,27 +63,21 @@ contains
         call INITPT(n, x0, nprob, factor)
     end subroutine getinit
 
-    function f(x)
+    function mgh_f(x)
         double precision, intent(in) :: x(:)
-        double precision             :: f
+        double precision             :: mgh_f
 
-        call OBJFCN(n, x, f, nprob)
-        nf = nf + 1
-        if (nf > 1000000) then
-            print '(a18, a10)', method, "FC"
-            call exit(1)
-        end if
-    end function f
+        call OBJFCN(n, x, mgh_f, nprob)
+    end function mgh_f
 
-    subroutine g(gx, x)
+    subroutine mgh_g(gx, x)
       double precision, intent(out) :: gx(:)
       double precision, intent(in)  :: x(:)
 
       call GRDFCN(n, x, gx, nprob)
-      ng = ng + 1
-  end subroutine g
+  end subroutine mgh_g
 
-    subroutine h(hx, x)
+    subroutine mgh_h(hx, x)
         double precision, intent(out) :: hx(:, :)
         double precision, intent(in)  :: x(:)
 
@@ -115,25 +97,5 @@ contains
                 hx(j, i) = hij
             end do
         end do
-        nh = nh + 1
-  end subroutine h
-
-    function nfev()
-        integer :: nfev
-
-        nfev = nf
-    end function nfev
-
-    function ngev()
-        integer :: ngev
-
-        ngev = ng
-    end function ngev
-
-    function nhev()
-        integer :: nhev
-
-        nhev = nh
-    end function nhev
-
+  end subroutine mgh_h
 end module MGH
