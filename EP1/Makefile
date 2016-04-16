@@ -26,16 +26,16 @@ LFLAGS = -lblas
 $(TARGET): directories $(OBJFILES)
 	$(FC) -I$(OBJ) $(FCLAGS) $(OBJFILES) $(LFLAGS) -o $(TARGET)
 
-$(OBJ)$(TARGET).o: $(TARGET).f95 $(MODFILES)
+$(OBJ)$(TARGET).o: $(TARGET).f08 $(MODFILES)
 	$(FC) -J$(OBJ) -I$(OBJ) -c $< -o $@
 
-$(OBJ)buscalinear.o $(OBJ)buscalinear.mod: $(SRC)buscalinear.f95 $(OBJ)cholesky.mod $(OBJ)trisys.mod
+$(OBJ)buscalinear.o $(OBJ)buscalinear.mod: $(SRC)buscalinear.f08 $(OBJ)cholesky.mod $(OBJ)trisys.mod
 	$(FC) -J$(OBJ) -c $< -o $(OBJ)buscalinear.o
 
-$(OBJ)cholesky.o $(OBJ)cholesky.mod: $(SRC)cholesky.f95 $(OBJ)utils.mod $(OBJ)trisys.mod
+$(OBJ)cholesky.o $(OBJ)cholesky.mod: $(SRC)cholesky.f08 $(OBJ)utils.mod $(OBJ)trisys.mod
 	$(FC) -J$(OBJ) -c $< -o $(OBJ)cholesky.o
 
-$(OBJ)%.o $(OBJ)%.mod: $(SRC)%.f95
+$(OBJ)%.o $(OBJ)%.mod: $(SRC)%.f08
 	$(FC) -J$(OBJ) -c $< -o $(OBJ)$*.o
 
 $(OBJ)%.o: $(SRC)%.f
