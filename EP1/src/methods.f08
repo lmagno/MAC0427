@@ -1,4 +1,4 @@
-module BuscaLinear
+module methods
     use   trisys, only: backcol, forwcol
     use cholesky, only: cholcol
     implicit none
@@ -501,4 +501,4 @@ contains
         deallocate(eye)
         deallocate(gx)
     end subroutine bfgs
-end module BuscaLinear
+end module methods

@@ -8,7 +8,7 @@ AUX = ./tex/aux/
 MGHSUB    = INITPT OBJFCN GRDFCN HESFCN
 MGHFILES += $(addprefix $(SRC), $(MGHSUB:=.f))
 
-MODNAMES  = buscalinear mgh cholesky trisys utils ls stats
+MODNAMES  = methods mgh cholesky trisys utils ls stats
 MODFILES  = $(MODNAMES:=.mod)
 MODFILES := $(addprefix $(OBJ), $(MODFILES))
 
@@ -29,8 +29,8 @@ $(TARGET): directories $(OBJFILES)
 $(OBJ)$(TARGET).o: $(TARGET).f08 $(MODFILES)
 	$(FC) -J$(OBJ) -I$(OBJ) -c $< -o $@
 
-$(OBJ)buscalinear.o $(OBJ)buscalinear.mod: $(SRC)buscalinear.f08 $(OBJ)cholesky.mod $(OBJ)trisys.mod
-	$(FC) -J$(OBJ) -c $< -o $(OBJ)buscalinear.o
+$(OBJ)methods.o $(OBJ)methods.mod: $(SRC)methods.f08 $(OBJ)cholesky.mod $(OBJ)trisys.mod
+	$(FC) -J$(OBJ) -c $< -o $(OBJ)methods.o
 
 $(OBJ)cholesky.o $(OBJ)cholesky.mod: $(SRC)cholesky.f08 $(OBJ)utils.mod $(OBJ)trisys.mod
 	$(FC) -J$(OBJ) -c $< -o $(OBJ)cholesky.o

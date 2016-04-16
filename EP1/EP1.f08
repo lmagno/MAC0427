@@ -48,7 +48,7 @@ contains
 end module rosenbrock
 
 program EP1
-    use BuscaLinear, only: grad, newt, bfgs
+    use methods, only: grad, newt, bfgs
     use         MGH, only: setprob, getdim, gettries, getname, getinit, mgh_f, mgh_g, mgh_h
     use          ls, only: lsquad, lscube
     use  rosenbrock, only: rosef, roseg, roseh
