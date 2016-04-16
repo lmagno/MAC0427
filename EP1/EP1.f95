@@ -50,9 +50,12 @@ end module rosenbrock
 program EP1
     use BuscaLinear, only: grad, newt, bfgs
     use         MGH, only: setprob, getdim, gettries, getname, getinit, mgh_f, mgh_g, mgh_h
-    use       stats, only: f, g, h, setf, setg, seth, initstat, printheader, printstat, setmethod, iteration, sett0, settf
     use          ls, only: lsquad, lscube
     use  rosenbrock, only: rosef, roseg, roseh
+    use       stats, only: f, g, h, &
+                           setf, setg, seth, &
+                           iteration, armijo, norm, angle, &
+                           initstat, printheader, printstat, setmethod, sett0, settf
     implicit none
 
     integer                       :: p, s
@@ -90,29 +93,29 @@ program EP1
     call seth(mgh_h)
 
     call printheader()
-    do nprob = 1, 1
-        ! call setprob(nprob)
-        ! ntries = gettries()
-        ! factor = 1.d0
-        !
-        ! name = getname()
-        ! n    = getdim()
-        !
-        ! print '(i2, x, a)', nprob, name
-        ! allocate( x(n))
-        ! allocate(x0(n))
-        ! call getinit(x0, factor)
+    do nprob = 1, 18
+        call setprob(nprob)
+        ntries = gettries()
+        factor = 1.d0
 
-        call initstat()
-        call setf(rosef)
-        call setg(roseg)
-        call seth(roseh)
+        name = getname()
+        n    = getdim()
 
-        n = 2
-        allocate(x(2))
-        allocate(x0(2))
-        x0(1) = 1
-        x0(2) = 2
+        print '(i2, x, a)', nprob, name
+        allocate( x(n))
+        allocate(x0(n))
+        call getinit(x0, factor)
+
+        ! call initstat()
+        ! call setf(rosef)
+        ! call setg(roseg)
+        ! call seth(roseh)
+        !
+        ! n = 2
+        ! allocate(x(2))
+        ! allocate(x0(2))
+        ! x0(1) = 1
+        ! x0(2) = 2
 
         ! Cria novo processo
         p = fork()
@@ -121,7 +124,7 @@ program EP1
             call setmethod("gradquad")
 
             call sett0()
-            call grad(x, x0, f, g, lsquad, gamma, eps)
+            call grad(x, x0, f, g, lsquad, gamma, eps, iteration, armijo)
             call settf()
 
             call printstat(x)
@@ -138,7 +141,7 @@ program EP1
             call setmethod("gradcube")
 
             call sett0()
-            call grad(x, x0, f, g, lscube, gamma, eps)
+            call grad(x, x0, f, g, lscube, gamma, eps, iteration, armijo)
             call settf()
 
             call printstat(x)
@@ -155,7 +158,7 @@ program EP1
             call setmethod("newtquad")
 
             call sett0()
-            call newt(x, x0, f, g, h, lsquad, gamma, sigma, theta, eps)
+            call newt(x, x0, f, g, h, lsquad, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
             call settf()
 
             call printstat(x)
@@ -173,7 +176,7 @@ program EP1
             call setmethod("newtcube")
 
             call sett0()
-            call newt(x, x0, f, g, h, lscube, gamma, sigma, theta, eps)
+            call newt(x, x0, f, g, h, lscube, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
             call settf()
 
             call printstat(x)
@@ -190,7 +193,7 @@ program EP1
             call setmethod("bfgsquad")
 
             call sett0()
-            call bfgs(x, x0, f, g, lsquad, gamma, sigma, theta, eps)
+            call bfgs(x, x0, f, g, lsquad, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
             call settf()
 
             call printstat(x)
@@ -208,7 +211,7 @@ program EP1
             call setmethod("bfgscube")
 
             call sett0()
-            call bfgs(x, x0, f, g, lscube, gamma, sigma, theta, eps)
+            call bfgs(x, x0, f, g, lscube, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
             call settf()
 
             call printstat(x)

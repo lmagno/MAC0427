@@ -2,7 +2,10 @@ module stats
     implicit none
     save
     private
-    public :: f, g, h, setf, setg, seth, initstat, printheader, printstat, setmethod, iteration, sett0, settf
+    public :: f, g, h, &
+              setf, setg, seth, &
+              iteration, armijo, norm, angle, &
+              initstat, printheader, printstat, setmethod, sett0, settf
 
     interface
         function f_t(x)
@@ -25,7 +28,7 @@ module stats
     procedure (g_t), pointer :: g_ptr => null()
     procedure (h_t), pointer :: h_ptr => null()
 
-    integer          :: nint
+    integer          :: nit, narm, nnor, nang
     integer          :: nf, ng, nh
     character(len=8) :: method
     double precision :: t0, tf
@@ -34,11 +37,15 @@ module stats
 
 contains
     subroutine initstat()
-        nint = 0
+        nit = 0
+        narm = 0
+        nnor = 0
+        nang = 0
         nf   = 0
         nh   = 0
         ng   = 0
 
+        method = ""
         f_ptr => null()
         g_ptr => null()
         h_ptr => null()
@@ -92,11 +99,24 @@ contains
     end subroutine h
 
     subroutine iteration()
-        nint = nint + 1
+        nit = nit + 1
     end subroutine iteration
 
+    subroutine armijo()
+        narm = narm + 1
+    end subroutine armijo
+
+    subroutine norm()
+        nnor = nnor + 1
+    end subroutine norm
+
+    subroutine angle()
+        nang = nang + 1
+    end subroutine angle
+
     subroutine printheader()
-        print '(18x, a16, a11, a11, a13, a14)', "‖∇f(x)‖", "t (s)", "nº f", "nº ∇f", "nº ∇²f"
+        print '(a34, a11, 2a10, a12, a13, 2a10, a11)', "‖∇f(x)‖", "t (s)", "it", "f", "∇f", "∇²f", &
+                                                           "armijo", "norma", "ângulo"
     end subroutine printheader
 
     subroutine printstat(x)
@@ -105,7 +125,7 @@ contains
         allocate(gx(size(x)))
 
         call g_ptr(gx, x)
-        print '(a18, e10.2, f11.3, 3i10)', method, norm2(gx), tf-t0, nf, ng, nh
+        print '(a18, e10.2, f11.3, 7i10)', method, norm2(gx), tf-t0, nit, nf, ng, nh, narm, nnor, nang
 
         deallocate(gx)
     end subroutine printstat

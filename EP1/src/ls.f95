@@ -2,7 +2,7 @@ module LS
     implicit none
 
 contains
-    subroutine lsquad(alpha, x, d, f, gamma, gTd, xd)
+    subroutine lsquad(alpha, x, d, f, gamma, gTd, xd, armijo)
         double precision, intent(inout) :: alpha
         double precision, intent(in)    :: x(:), d(:)
         double precision, intent(in)    :: gamma, gTd
@@ -13,6 +13,9 @@ contains
                 double precision, intent(in) :: x(:)
                 double precision             :: f
             end function f
+
+            subroutine armijo()
+            end subroutine armijo
         end interface
 
         ! Variáveis locais
@@ -28,6 +31,7 @@ contains
         xd  = x + a0*d
         fx0 = f(xd)
         if (fx0 <= fx + a0*gamma*gTd) then
+            call armijo()
             ! Condição de Armijo
             return
         end if
@@ -35,6 +39,7 @@ contains
         a1  = a0
         fx1 = fx0
         do while (fx1 > fx + a1*gamma*gTd)
+            call armijo()
             ! Aproximação quadrática de ϕ(α) = f(x + αd)
             !     q(α) = aα² + bα + q(0)
             ! cujo minimizador é
@@ -64,7 +69,7 @@ contains
         alpha = a1
     end subroutine lsquad
 
-    subroutine lscube(alpha, x, d, f, gamma, gTd, xd)
+    subroutine lscube(alpha, x, d, f, gamma, gTd, xd, armijo)
         double precision, intent(inout) :: alpha
         double precision, intent(in)    :: x(:), d(:)
         double precision, intent(in)    :: gamma, gTd
@@ -75,6 +80,9 @@ contains
                 double precision, intent(in) :: x(:)
                 double precision             :: f
             end function f
+
+            subroutine armijo()
+            end subroutine armijo
         end interface
 
         ! Variáveis locais
@@ -90,6 +98,7 @@ contains
         xd  = x + a0*d
         fx0 = f(xd)
         if (fx0 <= fx + a0*gamma*gTd) then
+            call armijo()
             ! Condição de Armijo
             return
         end if
@@ -116,6 +125,7 @@ contains
         xd  = x + a1*d
         fx1 = f(xd)
         if (fx1 <= fx + a1*gamma*gTd) then
+            call armijo()
             alpha = a1
             return
         end if
@@ -123,6 +133,7 @@ contains
         a2  = a1
         fx2 = fx1
         do while (fx2 > fx + a2*gamma*gTd)
+            call armijo()
             ! Aproximação cúbica de ϕ(α) = f(x + αd)
             !     q(α) = aα³ + bα² + q'(0)α + q(0)
             ! cujo minimizador é

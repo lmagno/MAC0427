@@ -4,7 +4,7 @@ module BuscaLinear
     implicit none
 
 contains
-    subroutine grad(x, x0, f, g, ls, gamma, eps)
+    subroutine grad(x, x0, f, g, ls, gamma, eps, iteration, armijo)
         ! Entrada
         double precision, intent(in) :: x0(:)   ! Ponto inicial
         double precision, intent(in) :: eps     ! Tolerância
@@ -22,7 +22,7 @@ contains
                 double precision, intent(in)  :: x(:)
             end subroutine g
 
-            subroutine ls(alpha, x, d, f, gamma, gTd, xd)
+            subroutine ls(alpha, x, d, f, gamma, gTd, xd, armijo)
                 double precision, intent(inout) :: alpha
                 double precision, intent(in)    :: x(:), d(:)
                 double precision, intent(in)    :: gamma, gTd
@@ -33,8 +33,17 @@ contains
                         double precision, intent(in) :: x(:)
                         double precision             :: f
                     end function f
+
+                    subroutine armijo()
+                    end subroutine armijo
                 end interface
             end subroutine ls
+
+            subroutine iteration()
+            end subroutine iteration
+
+            subroutine armijo()
+            end subroutine armijo
         end interface
 
         ! Saída
@@ -64,6 +73,7 @@ contains
         alpha = 1.d0
         gTd   = -norm2(gx)
         do while (norm2(gx) > eps)
+            call iteration()
             ! Máxima descida
             d = -gx
 
@@ -73,7 +83,7 @@ contains
             alpha = alpha/gTd
 
             ! Busca linear
-            call ls(alpha, x, d, f, gamma, gTd, xd)
+            call ls(alpha, x, d, f, gamma, gTd, xd, armijo)
 
             ! Atualiza x com o novo valor
             x  = x + alpha*d
@@ -86,7 +96,7 @@ contains
         deallocate(gx)
     end subroutine grad
 
-    subroutine newt(x, x0, f, g, h, ls, gamma, sigma, theta, eps)
+    subroutine newt(x, x0, f, g, h, ls, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
         ! Entrada
         double precision, intent(in) :: x0(:)   ! Ponto inicial
         double precision, intent(in) :: eps     ! Tolerância
@@ -111,7 +121,7 @@ contains
                 double precision, intent(in)  :: x(:)
             end subroutine h
 
-            subroutine ls(alpha, x, d, f, gamma, gTd, xd)
+            subroutine ls(alpha, x, d, f, gamma, gTd, xd, armijo)
                 double precision, intent(inout) :: alpha
                 double precision, intent(in)    :: x(:), d(:)
                 double precision, intent(in)    :: gamma, gTd
@@ -122,8 +132,23 @@ contains
                         double precision, intent(in) :: x(:)
                         double precision             :: f
                     end function f
+
+                    subroutine armijo()
+                    end subroutine armijo
                 end interface
             end subroutine ls
+
+            subroutine iteration()
+            end subroutine iteration
+
+            subroutine armijo()
+            end subroutine armijo
+
+            subroutine norm()
+            end subroutine norm
+
+            subroutine angle()
+            end subroutine angle
         end interface
 
         ! Saída
@@ -162,6 +187,7 @@ contains
         call g(gx, x)
 
         do while (norm2(gx) > eps)
+            call iteration()
             ! Calcula fator de Cholesky de uma aproximação
             ! definida positiva da hessiana
             !     GGᵀ = ∇²f(x) + ρI
@@ -189,6 +215,7 @@ contains
 
             ! Condição do ângulo
             do while (status == -1 .or. gTd > -theta*ng*nd)
+                call angle()
                 ! Faz shift nos autovalores e tenta novamente
                 ! hr = ∇²f(x) + ρI
                 hr = hx
@@ -218,6 +245,7 @@ contains
 
             ! Condição da norma
             if (nd < sigma*ng) then
+                call norm()
                 d = sigma*ng/nd*d
             end if
 
@@ -225,7 +253,7 @@ contains
 
             ! Busca linear
             alpha = 1.d0
-            call ls(alpha, x, d, f, gamma, gTd, xd)
+            call ls(alpha, x, d, f, gamma, gTd, xd, armijo)
 
             ! Atualiza x com o novo valor
             x  = x + alpha*d
@@ -241,7 +269,7 @@ contains
         deallocate(hr)
     end subroutine newt
 
-    subroutine bfgs(x, x0, f, g, ls, gamma, sigma, theta, eps)
+    subroutine bfgs(x, x0, f, g, ls, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
         ! Entrada
         double precision, intent(in) :: x0(:)   ! Ponto inicial
         double precision, intent(in) :: eps     ! Tolerância
@@ -261,7 +289,7 @@ contains
                 double precision, intent(in)  :: x(:)
             end subroutine g
 
-            subroutine ls(alpha, x, d, f, gamma, gTd, xd)
+            subroutine ls(alpha, x, d, f, gamma, gTd, xd, armijo)
                 double precision, intent(inout) :: alpha
                 double precision, intent(in)    :: x(:), d(:)
                 double precision, intent(in)    :: gamma, gTd
@@ -272,8 +300,23 @@ contains
                         double precision, intent(in) :: x(:)
                         double precision             :: f
                     end function f
+
+                    subroutine armijo()
+                    end subroutine armijo
                 end interface
             end subroutine ls
+
+            subroutine iteration()
+            end subroutine iteration
+
+            subroutine armijo()
+            end subroutine armijo
+
+            subroutine norm()
+            end subroutine norm
+
+            subroutine angle()
+            end subroutine angle
         end interface
 
         ! Saída
@@ -326,6 +369,7 @@ contains
 
         h = eye
         do while (ng > eps)
+            call iteration()
             ! Direção de Quasi-Newton
             ! d = -H∇f
             d(:) = 0.d0
@@ -338,14 +382,16 @@ contains
 
             ! Condição da norma
             if (nd < sigma*ng) then
+                call norm()
                 d = sigma*ng/nd*d
                 nd = norm2(d)
             end if
 
             gTd = dot_product(gx, d)
-            
+
             ! Condição do ângulo
             if (gTd > -theta*ng*nd) then
+                call angle()
                 h = eye
 
                 ! Vai pra próxima iteração
@@ -354,7 +400,7 @@ contains
 
             ! Busca linear
             alpha = 1.d0
-            call ls(alpha, x, d, f, gamma, gTd, xd)
+            call ls(alpha, x, d, f, gamma, gTd, xd, armijo)
 
             q = gx
 

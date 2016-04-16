@@ -74,7 +74,10 @@
 
         Em que a linha 4 impõe o decréscimo da função e a 5 é a atualização da iteração.
         A linha 3, entretanto, introduz a condição
-            $$ \nabla f(x^k)^\top d^k < 0 $$
+        \begin{equation}
+            \label{eq:desc}
+            \nabla f(x^k)^\top d^k < 0
+        \end{equation}
         cuja motivação pode ser vista através da expansão em Taylor da função:
             $$ f(x + \alpha d) = f(x) + \alpha\nabla f(x)^\top d + \frac{1}{2}\alpha^2d^\top\nabla^2 f(x)d + o(\|\alpha d\|^2)  $$
         assim, sempre podemos escolher um passo $\alpha$ suficientemente pequeno tal que o termo de primeira ordem domine os seguintes
@@ -105,9 +108,27 @@
             $$ \underset{k \rightarrow \infty}{lim} x^k = 1$$
         que não é nem ponto estacionário de $f$, então essas condições não são suficientes para garantir a convergência do algoritmo.
     \section*{Condições}
-        O algoritmo \ref{alg:ls}
+        Felizmente, com apenas algumas condições a mais podemos resolver o problema da convergência, a saber:
 
         \subsection*{Condição de Armijo}
+            É natural que exijamos que a função deva decrescer a cada iteração, mas somente isso basta? \emph{Quanto} $f$
+            deve decrescer? Uma forma de exigir um decréscimo mínimo é através da \emph{condição de Armijo}:
+
+            Dado $0 < \gamma < 1$ (normalmente $\gamma = 10^{-4}$)
+                $$ f(x + \alpha d) < f(x) + \gamma \alpha \nabla f(x)^\top d $$
+            que, sendo $d$ direção de descida (vale a equação \ref{eq:desc}), impõe um limite superior no valor da função
+            no novo ponto melhor do que a condição anterior (a qual equivale a fazermos $\gamma = 0$ aqui).
+
+            Além disso, sempre existe um $\alpha$ suficientemente pequeno para o qual Armijo vale, então podemos utilizar
+            a seguinte técnica, conhecida como \emph{backtracking} para 
+        \subsection*{Condição do Passo}
+            Um problema para a convergência é o tamanho de cada passo, pois, se estes diminuirem rápido demais, a sequência pode
+            convergir a algum ponto de acumulação que não tem propriedade de mínimo ou ponto estacionário. É o que acontece
+            no exemplo anterior, em que os passos $\alpha_k$ convergem rapidamente para zero, levando o algoritmo a um ponto
+            qualquer (no ponto de vista da minimização).
+
+            De forma similar, queremos evitar passos muito longos,
+
         \subsection*{Condição da Norma}
         \subsection*{Condição do Ângulo}
     \section*{Métodos}
