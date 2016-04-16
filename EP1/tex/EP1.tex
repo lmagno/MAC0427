@@ -3,7 +3,6 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{amsmath}
-\usepackage[brazilian]{babel}
 \usepackage[left=2.5cm,right=2.5cm,top=2.0cm,bottom=1.5cm]{geometry}
 \usepackage[hidelinks]{hyperref}
 \usepackage{indentfirst}
@@ -12,6 +11,11 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{txfonts} % Para usar o símbolo dos números reais (\varmathbb{R})
+\usepackage[brazilian]{babel}
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+\usepackage{enumitem}
+\setlist[description]{leftmargin=\parindent,labelindent=\parindent}
 
 \date{}
 \author{Lucas Magno \\ 7994983}
@@ -31,17 +35,11 @@
             \end{aligned}
         \end{equation*}
         ou seja, queremos encontrar $x^*$ que minimize $f$ (dito minimizador), o que pode se dar em duas formas:
-        \begin{itemize}
-            \item Minimizador global
-            \begin{align*}
-                     f(x^*) \leq f(x) \quad & \forall x \in \varmathbb{R}^n \\
-                     %
-                     \intertext{\item Minimizador local}
-                     %
-                     f(x^*) \leq f(x) \quad & \forall x \mid \|x - x^*\| \leq \epsilon \\
-                    \intertext{para algum $\epsilon > 0$ (isto é, existe uma vizinhança na qual $f(x^*)$ tem valor mínimo).}
-            \end{align*}
-        \end{itemize}
+        \begin{description}
+            \item [Minimizador global] $f(x^*) \leq f(x) \quad  \forall x \in \varmathbb{R}^n$
+            \item [Minimizador local]  $\,\,f(x^*) \leq f(x) \quad  \forall x \mid \|x - x^*\| \leq \epsilon$
+                    para algum $\epsilon > 0$ (isto é, existe uma vizinhança na qual $f(x^*)$ tem valor mínimo).
+        \end{description}
 
         Analogamente a problemas unidimensionais, sendo $f$ diferenciável, pode-se mostrar que, se $x^*$ é um minimizador
         (local ou global), então
@@ -230,9 +228,23 @@
             Devido a isso e à simplicidade, a identidade é uma escolha razoável para $H_0$.
 
             Novamente de forma análoga ao método das secantes, a convergência do BFGS fica entre os métodos de primeira e segunda ordem, isto é, é superlinear.
+
     \section*{Implementação}
-    \section*{Execução}
+        Para testar os métodos foi implementado um programa em \texttt{FORTRAN} que utiliza o conjunto de  funções implementadas em \citep*{More:1981:AFS:355934.355943}.
+        O programa em si é divido em vários módulos separados, a saber:
+
+        \begin{description}
+            \item[mgh] Faz a interface com os códigos em \texttt{F77} de \citep*{More:1981:AFS:355934.355943}, fornecendo a função objetiva, gradiente e hessiana para os 18 problemas implementados.
+            \item[ls] Contém os algoritmos que realizam a escolha do passo $\alpha$ através da busca linear por interpolação quadrática (\texttt{lsquad}) e cúbica (\texttt{lscube}).
+            \item[]
+            \item[]
+            \item[]
+            \item[]
+            \item[]
+
+        \end{description}
     \section*{Resultados}
     \section*{Conclusão}
 
+    \bibliography{EP1}
 \end{document}
