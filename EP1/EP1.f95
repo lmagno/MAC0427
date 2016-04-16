@@ -55,7 +55,7 @@ program EP1
     use       stats, only: f, g, h, &
                            setf, setg, seth, &
                            iteration, armijo, norm, angle, &
-                           initstat, printheader, printstat, setmethod, sett0, settf
+                           initstat, printheader, printstat, setmethod
     implicit none
 
     integer                       :: p, s
@@ -65,7 +65,6 @@ program EP1
     double precision, allocatable :: x(:), x0(:)
     double precision              :: gamma, sigma, theta, eps
 
-    double precision              :: tf, t0
     ! Chamadas do sistema para criar processos independentes
     ! Útil para matar uma conta específica sem afetar as outras
     interface
@@ -123,9 +122,7 @@ program EP1
             ! Processo filho
             call setmethod("gradquad")
 
-            call sett0()
             call grad(x, x0, f, g, lsquad, gamma, eps, iteration, armijo)
-            call settf()
 
             call printstat(x)
 
@@ -140,9 +137,7 @@ program EP1
             ! Processo filho
             call setmethod("gradcube")
 
-            call sett0()
             call grad(x, x0, f, g, lscube, gamma, eps, iteration, armijo)
-            call settf()
 
             call printstat(x)
 
@@ -157,9 +152,7 @@ program EP1
             ! Processo filho
             call setmethod("newtquad")
 
-            call sett0()
             call newt(x, x0, f, g, h, lsquad, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
-            call settf()
 
             call printstat(x)
 
@@ -175,9 +168,7 @@ program EP1
             ! Processo filho
             call setmethod("newtcube")
 
-            call sett0()
             call newt(x, x0, f, g, h, lscube, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
-            call settf()
 
             call printstat(x)
 
@@ -192,9 +183,7 @@ program EP1
             ! Processo filho
             call setmethod("bfgsquad")
 
-            call sett0()
             call bfgs(x, x0, f, g, lsquad, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
-            call settf()
 
             call printstat(x)
 
@@ -210,9 +199,7 @@ program EP1
             ! Processo filho
             call setmethod("bfgscube")
 
-            call sett0()
             call bfgs(x, x0, f, g, lscube, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
-            call settf()
 
             call printstat(x)
 

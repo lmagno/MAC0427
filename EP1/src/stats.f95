@@ -5,7 +5,7 @@ module stats
     public :: f, g, h, &
               setf, setg, seth, &
               iteration, armijo, norm, angle, &
-              initstat, printheader, printstat, setmethod, sett0, settf
+              initstat, printheader, printstat, setmethod
 
     interface
         function f_t(x)
@@ -31,7 +31,6 @@ module stats
     integer          :: nit, narm, nnor, nang
     integer          :: nf, ng, nh
     character(len=8) :: method
-    double precision :: t0, tf
 
     double precision, allocatable :: gx(:)
 
@@ -115,7 +114,7 @@ contains
     end subroutine angle
 
     subroutine printheader()
-        print '(a34, a11, 2a10, a12, a13, 2a10, a11)', "‖∇f(x)‖", "t (s)", "it", "f", "∇f", "∇²f", &
+        print '(a34, 2a10, a12, a13, 2a10, a11)', "‖∇f(x)‖", "it", "f", "∇f", "∇²f", &
                                                            "armijo", "norma", "ângulo"
     end subroutine printheader
 
@@ -125,7 +124,7 @@ contains
         allocate(gx(size(x)))
 
         call g_ptr(gx, x)
-        print '(a18, e10.2, f11.3, 7i10)', method, norm2(gx), tf-t0, nit, nf, ng, nh, narm, nnor, nang
+        print '(a18, e10.2, 7i10)', method, norm2(gx), nit, nf, ng, nh, narm, nnor, nang
 
         deallocate(gx)
     end subroutine printstat
@@ -135,13 +134,5 @@ contains
 
         method = name
     end subroutine setmethod
-
-    subroutine sett0()
-        call cpu_time(t0)
-    end subroutine sett0
-
-    subroutine settf()
-        call cpu_time(tf)
-    end subroutine settf
 
 end module stats
