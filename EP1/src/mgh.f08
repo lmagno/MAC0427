@@ -5,7 +5,6 @@ module mgh
     private
     integer :: n, nprob, ntries
 
-    integer :: nprobs  = 18
     integer,           dimension(18) :: vn      = (/ 3, 6, 3, 2, 3, 4, 10, 2, 2, 2, 4, 3, 2, 12, 4, 2, 4, 2/)
     integer,           dimension(18) :: vntries = (/ 2, 2, 2, 3, 2, 4,  4, 2, 2, 5, 2, 2, 2,  5, 2, 2, 4, 2/)
     character(len=30), dimension(18) :: names   = [character(len=30) :: &

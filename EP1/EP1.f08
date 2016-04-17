@@ -11,7 +11,7 @@ program EP1
     implicit none
 
     integer                       :: p, s
-    integer                       :: n, nprob, ntry, ntries, i
+    integer                       :: n, nprob, ntries, i
     character(len=30)             :: name
     double precision              :: factor = 1.d0
     double precision, allocatable :: x(:), x0(:)
@@ -32,6 +32,7 @@ program EP1
        end function wait
     end interface
 
+    s = 0
     gamma = 1e-4
     sigma = 1e-4
     theta = 1e-5
