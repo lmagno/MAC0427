@@ -34,7 +34,6 @@ contains
             ! Condição de Armijo
             return
         end if
-        call armijo()
 
         a1  = a0
         fx1 = fx0
@@ -128,7 +127,6 @@ contains
             alpha = a1
             return
         end if
-        call armijo()
 
         a2  = a1
         fx2 = fx1
