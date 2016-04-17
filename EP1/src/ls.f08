@@ -31,10 +31,10 @@ contains
         xd  = x + a0*d
         fx0 = f(xd)
         if (fx0 <= fx + a0*gamma*gTd) then
-            call armijo()
             ! Condição de Armijo
             return
         end if
+        call armijo()
 
         a1  = a0
         fx1 = fx0
@@ -98,10 +98,10 @@ contains
         xd  = x + a0*d
         fx0 = f(xd)
         if (fx0 <= fx + a0*gamma*gTd) then
-            call armijo()
             ! Condição de Armijo
             return
         end if
+        call armijo()
 
         ! Aproximação quadrática de ϕ(α) = f(x + αd)
         !     q(α) = aα² + bα + q(0)
@@ -125,10 +125,10 @@ contains
         xd  = x + a1*d
         fx1 = f(xd)
         if (fx1 <= fx + a1*gamma*gTd) then
-            call armijo()
             alpha = a1
             return
         end if
+        call armijo()
 
         a2  = a1
         fx2 = fx1
