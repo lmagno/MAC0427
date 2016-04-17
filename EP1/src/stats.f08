@@ -114,7 +114,7 @@ contains
     end subroutine angle
 
     subroutine printheader()
-        print '(a34, 2a10, a12, a13, 2a10, a11)', "‖∇f(x)‖", "it", "f", "∇f", "∇²f", &
+        print '(a34, 2a10, a12, a13, 2a10, a11)', "‖∇f*‖", "it", "f", "∇f", "∇²f", &
                                                            "armijo", "norma", "ângulo"
     end subroutine printheader
 
