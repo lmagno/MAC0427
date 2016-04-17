@@ -8,7 +8,7 @@ AUX = ./aux/
 MGHSUB    = INITPT OBJFCN GRDFCN HESFCN
 MGHFILES += $(addprefix $(SRC), $(MGHSUB:=.f))
 
-MODNAMES  = methods mgh cholesky trisys utils ls stats
+MODNAMES  = methods mgh cholesky trisys utils ls stats paraboloid rosenbrock
 MODFILES  = $(MODNAMES:=.mod)
 MODFILES := $(addprefix $(OBJ), $(MODFILES))
 
@@ -23,7 +23,7 @@ LFLAGS = -lblas
 
 .PHONY: directories clean tex
 
-$(TARGET): directories $(OBJFILES)
+$(TARGET): directories $(OBJFILES) $(SRC)runmethods.f08
 	$(FC) -I$(OBJ) $(FCLAGS) $(OBJFILES) $(LFLAGS) -o $(TARGET)
 
 $(OBJ)$(TARGET).o: $(TARGET).f08 $(MODFILES)
