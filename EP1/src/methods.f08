@@ -70,8 +70,9 @@ contains
         x  = x0
         call g(gx, x)
 
+        d     = -gx
+        gTd   = dot_product(gx, d)
         alpha = 1.d0
-        gTd   = -norm2(gx)
         do while (norm2(gx) > eps)
             call iteration()
             ! Máxima descida
@@ -88,6 +89,7 @@ contains
             ! Atualiza x com o novo valor
             x  = x + alpha*d
             call g(gx, x)
+
         end do
 
         ! Libera a memória
