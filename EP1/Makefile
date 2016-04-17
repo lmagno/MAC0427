@@ -3,7 +3,7 @@ TARGET = EP1
 SRC = ./src/
 OBJ = ./obj/
 TEX = ./tex/
-AUX = ./tex/aux/
+AUX = ./aux/
 
 MGHSUB    = INITPT OBJFCN GRDFCN HESFCN
 MGHFILES += $(addprefix $(SRC), $(MGHSUB:=.f))

@@ -15,7 +15,8 @@
 \usepackage{natbib}
 \bibliographystyle{plainnat}
 \usepackage{enumitem}
-\setlist[description]{leftmargin=\parindent,labelindent=\parindent}
+\usepackage{dirtree}
+\setlist[description]{leftmargin=2\parindent,labelindent=2\parindent}
 
 \date{}
 \author{Lucas Magno \\ 7994983}
@@ -119,7 +120,7 @@
 
             Além disso, sempre existe um $\alpha$ suficientemente pequeno para o qual Armijo vale, então podemos utilizar
             a seguinte técnica, conhecida como \emph{backtracking} para determinar um passo satisfatório: partindo de um
-            passo candidato, se este não satisfizer Armijo, diminua ele e tente novamente. Repetindo essas etapas, chegaremos a
+            passo candidato\footnote{É importante que esse passo candidato seja $\alpha = 1$ para os métodos de Newton e Quasi-Newton, pois para pontos suficientemente próximos da solução ele é sempre aceito e isso que dá origem a convergência quadrática e superlinear dos métodos, respectivamente.}, se este não satisfizer Armijo, diminua ele e tente novamente. Repetindo essas etapas, chegaremos a
             um valor que o satisfaça e então o adotamos.
 
         \subsection*{Condição do Passo}
@@ -179,7 +180,7 @@
             Mais complexo que o método do gradiente, o método de Newton se baseia em pegar a direção que minimiza uma aproximação quadrática da função objetiva,
             isto é, os primeiros termos de expansão de $f$ em série de Taylor:
                 $$ f(x + d) = f(x) + \nabla f(x)^\top d + \frac{1}{2}d^\top\nabla^2f(x)d $$
-            e é simples ver que tal direção é solução do sistema
+            e é simples ver que tal direção é solução do sistema\footnote{Portanto o método de Newton exige $f \in C^2$.}
                 $$ \nabla^2 f(x)d = -\nabla f(x)$$
 
             Por utilizar informações de segunda ordem sobre a função, podemos esperar um melhor comportamento para este método, comparando com o anterior.
@@ -198,9 +199,8 @@
             a existência de uma solução e que esta será uma direção de descida. Melhor ainda, note que quanto maior a constante, mais $B$ se aproxima
             da identidade e portanto do método do gradiente, o qual sabemos que satisfaz a condição do ângulo.
 
-        \subsection*{Método BFGS}
-            A fim de ser menos custoso que o método de Newton, mas mais esperto que o de máxima descida, o método BFGS\footnote{Broyden–Fletcher–Goldfarb–Shanno.}
-            é análogo ao método de secantes para se achar zero de funções, no sentido de que constrói uma aproximação da hessiana, de segunda ordem, a partir
+        \subsection*{Método BFGS (Quasi-Newton)}
+            A fim de ser menos custoso que o método de Newton, mas mais esperto que o de máxima descida, o método BFGS\footnote{Broyden–Fletcher–Goldfarb–Shanno.} (um dos métodos conhecidos como \emph{Quasi-Newton}) é análogo ao método de secantes para se achar zero de funções, no sentido de que constrói uma aproximação da hessiana, de segunda ordem, a partir
             de diversas informações de primeira ordem.
 
             Dessa forma, não é necessário o cálculo da hessiana a cada iteração, apenas uma aproximação, e ainda podemos exigir que tal aproximação
@@ -229,20 +229,47 @@
 
             Novamente de forma análoga ao método das secantes, a convergência do BFGS fica entre os métodos de primeira e segunda ordem, isto é, é superlinear.
 
-    \section*{Implementação}
-        Para testar os métodos foi implementado um programa em \texttt{FORTRAN 2008} que utiliza o conjunto de  funções implementadas em \citep*{More:1981:AFS:355934.355943}.
-        O programa em si é divido em vários módulos separados, a saber:
+            Vale notar também que essa fórmula para $H_{k+1}$ nos permite a calcular sem o uso de memória auxiliar, já que ela contém escalares ($q_k^\top H_kq_k$, $p_k^\top q_k$),  produtos externos ($p_kp_k^\top$, $p_kq_k^\top$, $q_kp_k^\top$) e seus produtos com $H_k$, que são simples de descrever. A dificuldade se encontra na ordem em que os elementos de $H_{k+1}$ devem ser gravados sobre $H_k$, já que cada elemento daquela depende de todos desta.
 
-        \begin{description}
-            \item[mgh] Faz a interface com os códigos em \texttt{F77} de \citep*{More:1981:AFS:355934.355943}, fornecendo a função objetiva, gradiente e hessiana para os 18 problemas implementados.
-            \item[ls] Contém os algoritmos que realizam a escolha do passo $\alpha$ através da busca linear por interpolação quadrática (\texttt{lsquad}) e cúbica (\texttt{lscube}).
-            \item[methods]
-            \item[]
-            \item[]
-            \item[]
-            \item[]
+            No entanto, observando que a matriz é sempre simétrica (pela fórmula), ou seja, a parte triangular inferior é a transposta da superior, podemos sobrescrever primeiro a parte triangular inferior de $H_k$ (sem a diagonal principal), tomando cuidado para ler somente da triangular superior. Depois, podemos sobrescrever a diagonal principal, novamente lendo somente da parte triangular superior e finalmente basta copiar os valores calculados na triangular inferior para a superior, obtendo a matriz $H_{k+1}$ completa.
+    \newpage
+    \section*{O Programa}
+        Para implementar os métodos foi feito um programa em \texttt{FORTRAN 2008} que testa o conjunto de 18 problemas implementados em \citep*{More:1981:AFS:355934.355943}.
 
-        \end{description}
+        \subsection*{Módulos}
+            O programa em si é divido em vários módulos, a saber:
+
+            \begin{description}
+                \item[mgh] Faz a interface com os códigos em \texttt{F77} de \citep*{More:1981:AFS:355934.355943}, que fornecem as subrotinas (e o que calculam, para cada um dos 18 problemas):
+                    \begin{description}
+                        \item[\texttt{INITPT}] $x^0$
+                        \item[\texttt{OBJFCN}] $f(x)$
+                        \item[\texttt{GRDFCN}] $\nabla f(x)$
+                        \item[\texttt{HESFCN}] $\nabla^2 f(x)$
+                    \end{description}
+
+                \item[ls] Contém os algoritmos que realizam a escolha do passo $\alpha$ através da busca linear por interpolação quadrática (\texttt{lsquad}) e cúbica (\texttt{lscube}).
+                \item[methods] Implementa os métodos (\texttt{grad}, \texttt{newt}, \texttt{bfgs}) de fato.
+                \item[cholesky, trisys, utils] Conjunto de módulos para a decomposição de matrizes em fatores de Cholesky e a resolução de sistemas lineares que as contenham.
+                \item[stats] Fornece \emph{wrappers} e subrotinas para automatizar a contagem e a impressão de diversas etapas durante a execução dos algoritmos.
+            \end{description}
+
+        \subsection*{Arquivos}
+            No diretório fonte ficam os arquivos:
+            \begin{description}
+                \item[\texttt{EP1.f08}] Código principal, responsável por juntar os módulos e iniciar a execução.
+                \item[\texttt{EP1}] Executável, criado com o comando \texttt{make}.
+                \item[\texttt{EP1.pdf}] Relatório, criado com o comando \texttt{make tex}.
+                \item[\texttt{Makefile}]
+            \end{description}
+
+            Os demais arquivos são distribuídos nos seguintes diretórios:
+            \begin{description}
+                \item[\texttt{src/}] Contém os respectivos arquivos de cada módulo (\texttt{.f08}), bem como os das subrotinas MGH (\texttt{.f}).
+                \item[\texttt{obj/}] Criado durante a compilação, guarda os arquivos objetos (\texttt{.o}) e módulos (\texttt{.mod}). É excluído com o comando \texttt{make clean}.
+                \item[\texttt{tex/}] Contém o código fonte deste relatório (\texttt{.tex}) e a bibliografia (\texttt{.bib}).
+                \item[\texttt{aux/}] Criado durante a compilação, guarda os arquivos auxiliares do \LaTeX  e do \texttt{BibTeX}. É excluído com o comando \texttt{make clean}.
+            \end{description}
     \section*{Resultados}
     \section*{Conclusão}
 
