@@ -1,4 +1,4 @@
-module MGH
+module mgh
     implicit none
     save
 
@@ -98,4 +98,4 @@ contains
             end do
         end do
   end subroutine mgh_h
-end module MGH
+end module mgh

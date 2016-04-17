@@ -1,4 +1,4 @@
-module LS
+module ls
     implicit none
 
 contains
@@ -167,4 +167,4 @@ contains
 
         alpha = a2
     end subroutine lscube
-end module LS
+end module ls

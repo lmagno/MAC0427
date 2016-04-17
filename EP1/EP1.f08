@@ -1,6 +1,6 @@
 program EP1
     use     methods, only: grad, newt, bfgs
-    use         MGH, only: setprob, getdim, gettries, getname, getinit, mgh_f, mgh_g, mgh_h
+    use         mgh, only: setprob, getdim, gettries, getname, getinit, mgh_f, mgh_g, mgh_h
     use          ls, only: lsquad, lscube
     use  rosenbrock, only: rosef, roseg, roseh
     use  paraboloid, only: paraf, parag, parah
