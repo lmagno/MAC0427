@@ -26,7 +26,7 @@
     \maketitle
 
     \section*{Introdução}
-        Seja uma pessoa querendo controlar gastos ou um cientista buscando o estado de menor energia de um sistema, a miniminização (e seu equivalente, maximimização) é um problema ubíquo e não é surpreendente que pessoas buscaram desenvolver técnicas sofisticadas para sua resolução.
+        Seja uma pessoa querendo controlar gastos ou um cientista buscando o estado de menor energia de um sistema, a miniminização (e seu equivalente, maximimização) é um problema ubíquo e não é surpreendente que pessoas buscassem desenvolver técnicas sofisticadas para sua resolução.
 
         Essa classe de problemas, conhecida como otimização, apresenta diversas abordagens diferentes e neste trabalho será explorada uma delas: a otimização contínua irrestrita.
         Isto é, focaremos na minimização de funções contínuas, sem se preocupar em que região do seu domínio as soluções podem estar.
@@ -122,11 +122,11 @@
             deve decrescer? Uma forma de exigir um decréscimo mínimo é através da \emph{condição de Armijo}:
 
             Dado $0 < \gamma < 1$ (normalmente $\gamma = 10^{-4}$)
-                $$ f(x + \alpha d) < f(x) + \gamma \alpha \nabla f(x)^\top d $$
+                $$ f(x + \alpha d) \leq f(x) + \gamma \alpha \nabla f(x)^\top d $$
             que, sendo $d$ direção de descida (vale a equação \ref{eq:desc}), impõe um limite superior no valor da função
-            no novo ponto melhor do que a condição anterior (a qual equivale a fazermos $\gamma = 0$ aqui).
+            no novo ponto de forma mais exigente do que a condição anterior (a qual equivale à escolha $\gamma = 0$).
 
-            Além disso, sempre existe um $\alpha$ suficientemente pequeno para o qual Armijo vale, então podemos utilizar
+            Além disso, sempre existe um $\alpha$ suficientemente pequeno para o qual Armijo vale, o que sugere
             a seguinte técnica, conhecida como \emph{backtracking} para determinar um passo satisfatório: partindo de um
             passo candidato\footnote{É importante que esse passo candidato seja $\alpha = 1$ para os métodos de Newton e Quasi-Newton, pois para pontos suficientemente próximos da solução ele é sempre aceito e isso que dá origem a convergência quadrática e superlinear dos métodos, respectivamente.}, se este não satisfizer Armijo, diminua ele e tente novamente. Repetindo essas etapas, chegaremos a
             um valor que o satisfaça e então o adotamos.
@@ -155,7 +155,7 @@
                 $$ \|d^k\| \geq \sigma \|\nabla f(x^k) \|$$
             para algum $\sigma > 0$.
 
-            Assim, limitamos inferiormente o avanço e mesmo assim permitindo que este seja suficientemente pequeno perto do ponto estacionário
+            Limitando, portanto, inferiormente o avanço e mesmo assim permitindo que este seja suficientemente pequeno perto do ponto estacionário
             ($ \nabla f $ pequeno).
 
         \subsection*{Condição do Ângulo}
@@ -170,14 +170,14 @@
 
     \newpage
     \section*{Métodos}
-        Como visto, a busca linear é um paradigma razoavelmente simples, mas como escolhemos a direção de busca? Há várias estratégias para isso e é
+        Como visto, a busca linear é um paradigma razoavelmente simples, mas como escolhemos a direção de busca? Há várias estratégias para tal e é
         isso que diferencia os diversos métodos existentes.
 
         \subsection*{Método do Gradiente}
             Talvez o método mais simples, consiste em se escolher a direção de busca como sendo no sentido oposto ao gradiente:
                 $$ d = -\nabla f(x) $$
 
-            Então, ao menos localmente, $d$ aponta para onde a função mais descresce e por isso este método também é conhecido como \emph{máxima descida.}
+            Então, ao menos localmente, $d$ aponta para onde a função mais descresce, o que dá ao método o nome de \emph{máxima descida.}
 
             É fácil verificar que esta direção satisfaz as condições de norma (com $\sigma \leq 1$) e ângulo, então só é necessário verificar Armijo e o tamanho do passo.
 
@@ -249,7 +249,7 @@
             O programa em si é divido em vários módulos, a saber:
 
             \begin{description}
-                \item[mgh] Faz a interface com os códigos em \texttt{F77} de \citep*{More:1981:AFS:355934.355943}, que fornecem as subrotinas (e o que calculam, para cada um dos 18 problemas):
+                \item[mgh] Faz a interface com os códigos em \texttt{F77} de MGH, que fornecem as subrotinas (e o que calculam, para cada um dos 18 problemas):
                     \begin{description}
                         \item[\texttt{INITPT}] $x^0$
                         \item[\texttt{OBJFCN}] $f(x)$
@@ -290,8 +290,8 @@
             \end{description}
 
         \subsection*{Execução}
-            Ao executar o programa, para cada um dos 18 problemas disponíveis, os três métodos apresentados serão testados (e tanto com interpolação quadrática, quanto cúbica).
-            Então, para cada problema, 6 processos diferentes são criados e rodados em paralelos, através da chamada para o sistema \texttt{fork()} e o processo principal aguarda o término destes antes de passar para o próximo problema.
+            Ao executar o programa, para cada um dos problemas, os três métodos apresentados serão testados (e tanto com interpolação quadrática, quanto cúbica).
+            Então, para cada problema, 6 processos diferentes são criados e rodados em paralelo, através da chamada para o sistema \texttt{fork()} e o processo principal aguarda o término destes antes de passar para o próximo problema.
 
             O critério de parada escolhido para cada método foi a norma\footnote{Todas as normas utilizadas nesse trabalho são euclidianas.} do gradiente final, ou seja, fornecido um $\epsilon > 0$, o programa para quando
                 $$ \Vert \nabla f(x^k) \Vert < \epsilon $$
@@ -306,12 +306,12 @@
                 \begin{tabular}{r|rrrrrrrr}
                     1 Helical Valley  & $\Vert\nabla f_*\Vert$ & it & $f$ & $\nabla f $ & $\nabla^2f$ & armijo & norma & ângulo \\
                     \hline
-                    bfgscube & 1.10E-06 & 74 & 263 & 61 & 0 & 94 & 0 & 14 \\
-                    bfgsquad & 5.80E-06 & 93 & 327 & 79 & 0 & 172 & 0 & 15 \\
-                    newtcube & 1.10E-06 & 12 & 25 & 13 & 12 & 12 & 4 & 50 \\
-                    gradquad & 9.30E-06 & 2234 & 4508 & 2235 & 0 & 2235 & 0 & 0 \\
-                    gradcube & 9.40E-06 & 2266 & 4573 & 2267 & 0 & 2266 & 0 & 0 \\
-                    newtquad & 1.10E-06 & 12 & 25 & 13 & 12 & 12 & 4 & 50
+                    newtcube & 0.11E-05  &      12  &      25  &      13   &     12   &      1    &     4   &     50 \\
+                    bfgscube & 0.11E-05  &      74  &     263  &      61   &      0   &    143    &     0   &     14 \\
+                    bfgsquad & 0.58E-05  &      93  &     327  &      79   &      0   &    171    &     0   &     15 \\
+                    newtquad & 0.11E-05  &      12  &      25  &      13   &     12   &      1    &     4   &     50 \\
+                    gradquad & 0.98E-05  &    2296  &    4638  &    2297   &      0   &     46    &     0   &      0 \\
+                    gradcube & 0.98E-05  &    2287  &    4618  &    2288   &      0   &     44    &     0   &      0 \\
                 \end{tabular}
                 \caption{Saída do programa para o primeiro problema de Moré-Garbow-Hillstrom (\emph{Helical Valley}), com $\epsilon = \theta = 10^{-5} $, $\gamma = \sigma = 10^{-4}$.}
             \end{table}
@@ -344,6 +344,7 @@
                         100
                      \end{bmatrix} $$
         Rodando essa função no programa, temos os resultados
+
         \begin{table}[h]
             \centering
             \begin{tabular}{r|rrrrrrrr}
@@ -497,5 +498,8 @@
         Há uma grande liberdade em se adotar estratégias dentro do paradigma de busca linear, e no geral é necessário balancear simplicidade e eficiência. Mesmo assim, isso varia muito com o problema em questão, o que impossibilita a escolha do ``melhor'' método, já que um método supreendentemente pode se mostrar o mais eficaz naquele contexto.
 
         Mas no geral há métodos que se mostram eficazes em boa parte dos problemas e acabam se tornando padrões, como o BFGS, que evita os problemas do método do gradiente e tem a vantagem de não exigir informações de segunda ordem do problema, como o de Newton.
+
+        Portanto, a escolha de um algorítmo às vezes se mostra por tentativa e erro, a não ser que o problema em questão tenha características bem conhecidas que possam ser exploradas por algum método particular.
+        
     \bibliography{EP1}
 \end{document}
