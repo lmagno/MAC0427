@@ -26,6 +26,14 @@
     \maketitle
 
     \section*{Introdução}
+        Seja uma pessoa querendo controlar gastos ou um cientista buscando o estado de menor energia de um sistema, a miniminização (e seu equivalente, maximimização) é um problema ubíquo e não é surpreendente que pessoas buscaram desenvolver técnicas sofisticadas para sua resolução.
+
+        Essa classe de problemas, conhecida como otimização, apresenta diversas abordagens diferentes e neste trabalho será explorada uma delas: a otimização contínua irrestrita.
+        Isto é, focaremos na minimização de funções contínuas, sem se preocupar em que região do seu domínio as soluções podem estar.
+
+        Mais especificadamente, exploraremos o paradigma de busca linear, um dos mais conhecidos juntamente com o de região de confiança (que não será tratado aqui).
+        Com isso se espera determinar a eficiência dos algoritmos mais conhecidos e em que contexto eles são melhor aplicados.
+
     \section*{Otimização Irrestrita}
         Dado $f: \varmathbb{R}^n \rightarrow \varmathbb{R}$, um problema de
         otimização irrestrita pode ser escrito
@@ -42,7 +50,7 @@
                     para algum $\epsilon > 0$ (isto é, existe uma vizinhança na qual $f(x^*)$ tem valor mínimo).
         \end{description}
 
-        Analogamente a problemas unidimensionais, sendo $f$ diferenciável, pode-se mostrar que, se $x^*$ é um minimizador
+        Analogamente a problemas unidimensionais, sendo $f$ diferenciável, pode-se mostrar \citep*{Nocedal2006NO} que, se $x^*$ é um minimizador
         (local ou global), então
             $$ \nabla f(x^*) = 0 $$
         o que nos dá uma forma de encontrar os minimizadores, pois basta encontrar os pontos que anulam o gradiente (dito estacionários).
@@ -160,6 +168,7 @@
                 $$ \nabla f(x)^\top d \leq -\theta \|\nabla f(x)\| \|d\| $$
             para algum $0 < \theta \leq 1$.
 
+    \newpage
     \section*{Métodos}
         Como visto, a busca linear é um paradigma razoavelmente simples, mas como escolhemos a direção de busca? Há várias estratégias para isso e é
         isso que diferencia os diversos métodos existentes.
@@ -208,8 +217,8 @@
             da hessiana e eliminar de vez a necessidade de se resolver um sistema linear.
 
             Essas exigências, mais o fato de que essas aproximações sejam definidas positivas, determinam o método BFGS, que, embora não seja
-            simples mostrar, consiste em calcular, a cada iteração
-                $$ H_{k+1} = H_k + \left( \frac{1 + q_k^\top H_kq_k}{p_k^\top q_k}\right)\frac{p_kp_k^\top}{p_k^\top q_k} - \frac{p_kq_k^\top H_k + H_kq_kp_k^\top}{p_k^\top q_k}$$
+            simples mostrar \citep*{Friedlander94} \footnote{Embora a referência tenha sido o livro da Ana, na Wikipédia (\href{https://en.wikipedia.org/wiki/Broyden-Fletcher-Goldfarb-Shanno_algorithm}{BFGS}) encontrei essa expressão com o fator $p_k^\top q_k$ ao invés da constante $1$ e, na prática, o algoritmo se mostrou muito mais eficiente nesse caso, então escolhi essa fórmula.}, consiste em calcular, a cada iteração
+                $$ H_{k+1} = H_k + \left( \frac{p_k^\top q_k + q_k^\top H_kq_k}{p_k^\top q_k}\right)\frac{p_kp_k^\top}{p_k^\top q_k} - \frac{p_kq_k^\top H_k + H_kq_kp_k^\top}{p_k^\top q_k}$$
             em que\footnote{Vale notar que $H_k$ também deve satisfazer $H_kq_j = p_j$ para todo $j \leq k$, que, não por coincidência, é a chamada \emph{equação secante}.}
 
                 \begin{equation*}
@@ -258,20 +267,235 @@
             No diretório fonte ficam os arquivos:
             \begin{description}
                 \item[\texttt{EP1.f08}] Código principal, responsável por juntar os módulos e iniciar a execução.
-                \item[\texttt{EP1}] Executável, criado com o comando \texttt{make}.
-                \item[\texttt{EP1.pdf}] Relatório, criado com o comando \texttt{make tex}.
+                \item[\texttt{EP1}] Executável, criado durante a compilação.
+                \item[\texttt{EP1.pdf}] Relatório, criado durante a compilação.
                 \item[\texttt{Makefile}]
             \end{description}
 
             Os demais arquivos são distribuídos nos seguintes diretórios:
             \begin{description}
                 \item[\texttt{src/}] Contém os respectivos arquivos de cada módulo (\texttt{.f08}), bem como os das subrotinas MGH (\texttt{.f}).
-                \item[\texttt{obj/}] Criado durante a compilação, guarda os arquivos objetos (\texttt{.o}) e módulos (\texttt{.mod}). É excluído com o comando \texttt{make clean}.
+                \item[\texttt{obj/}] Criado durante a compilação, guarda os arquivos objetos (\texttt{.o}) e módulos (\texttt{.mod}). É excluído na limpeza.
                 \item[\texttt{tex/}] Contém o código fonte deste relatório (\texttt{.tex}) e a bibliografia (\texttt{.bib}).
-                \item[\texttt{aux/}] Criado durante a compilação, guarda os arquivos auxiliares do \LaTeX  e do \texttt{BibTeX}. É excluído com o comando \texttt{make clean}.
+                \item[\texttt{aux/}] Criado durante a compilação, guarda os arquivos auxiliares do \LaTeX  e do \texttt{BibTeX}. É excluído na limpeza.
             \end{description}
-    \section*{Resultados}
-    \section*{Conclusão}
 
+        \subsection*{Compilação}
+            A partir do diretório raiz, os seguintes comandos são possíveis:
+
+            \begin{description}
+                \item[make] Compila o programa, criando o executável.
+                \item[make tex] Compila o relatório, criando o arquivo \texttt{.pdf}.
+                \item[make clean] Realiza a limpeza, deletando os arquivos de saída.
+            \end{description}
+
+        \subsection*{Execução}
+            Ao executar o programa, para cada um dos 18 problemas disponíveis, os três métodos apresentados serão testados (e tanto com interpolação quadrática, quanto cúbica).
+            Então, para cada problema, 6 processos diferentes são criados e rodados em paralelos, através da chamada para o sistema \texttt{fork()} e o processo principal aguarda o término destes antes de passar para o próximo problema.
+
+            O critério de parada escolhido para cada método foi a norma\footnote{Todas as normas utilizadas nesse trabalho são euclidianas.} do gradiente final, ou seja, fornecido um $\epsilon > 0$, o programa para quando
+                $$ \Vert \nabla f(x^k) \Vert < \epsilon $$
+            já que desejamos que essa norma seja nula.
+
+            Cada um dos processos, ao terminar, imprime para a tela um resumo dos dados do algorítmo, como norma final do gradiente, número de iterações, chamadas à função objetiva, etc.
+            Assim, os resultados de todos os métodos ficam organizados por problema.
+
+            Como exemplo de saída, podemos olhar o seguinte problema:
+            \begin{table}[h]
+                \centering
+                \begin{tabular}{r|rrrrrrrr}
+                    1 Helical Valley  & $\Vert\nabla f_*\Vert$ & it & $f$ & $\nabla f $ & $\nabla^2f$ & armijo & norma & ângulo \\
+                    \hline
+                    bfgscube & 1.10E-06 & 74 & 263 & 61 & 0 & 94 & 0 & 14 \\
+                    bfgsquad & 5.80E-06 & 93 & 327 & 79 & 0 & 172 & 0 & 15 \\
+                    newtcube & 1.10E-06 & 12 & 25 & 13 & 12 & 12 & 4 & 50 \\
+                    gradquad & 9.30E-06 & 2234 & 4508 & 2235 & 0 & 2235 & 0 & 0 \\
+                    gradcube & 9.40E-06 & 2266 & 4573 & 2267 & 0 & 2266 & 0 & 0 \\
+                    newtquad & 1.10E-06 & 12 & 25 & 13 & 12 & 12 & 4 & 50
+                \end{tabular}
+                \caption{Saída do programa para o primeiro problema de Moré-Garbow-Hillstrom (\emph{Helical Valley}), com $\epsilon = \theta = 10^{-5} $, $\gamma = \sigma = 10^{-4}$.}
+            \end{table}
+
+            em que cada coluna representa:
+            \begin{description}[align=right, leftmargin=4\parindent,labelindent=4\parindent]
+                \item [$\Vert\nabla f_*\Vert$] A norma do gradiente no último ponto calculado (solução).
+                \item [it] O número de iterações do algorítmo.
+                \item [$f$] O número de chamadas da função objetiva realizadas.
+                \item [$\nabla f $] O número de chamadas do gradiente realizadas.
+                \item [$\nabla^2f$] O número de chamadas da hessiana realizadas.
+                \item [armijo] O número de vezes em que a condição de Armijo não foi satisfeita.
+                \item [norma] O número de vezes em que a condição da norma não foi satisfeita.
+                \item [ângulo] O número de vezes em que a condição do ângulo não foi satisfeita.
+            \end{description}
+
+            Além disso, como a execução é em paralelo, não existe uma ordem fixa entre os métodos, isto é, cada um imprime seus resultados assim que terminar. Consequentemente, a ordem final em que os métodos aparecem pode indicar o tempo gasto por cada um. No entanto, questões como o \emph{buffer} para a saída podem alterar essa ordem, então ela não deve ser tomada literalmente e por isso daqui em diante eles serão apresentados em uma ordem fixa, para facilitar a leitura.
+
+            Assim, indicadores melhores do gasto de cada algorítmo são os contadores. O tempo de execução de fato não foi registrado pois esse se mostrou muito abaixo da precisão disponível (milissegundo), não sendo útil para comparação.
+
+    \newpage
+    \section*{Resultados}
+        Para começar com um exemplo simples, tomemos o parabolóide dado por
+            $$ f(x) = x_1^2 + 1000x_2^2 $$
+        e cujo mínimo é
+            $$ f(0, 0) = 0$$
+        e o ponto inicial
+            $$ x^0 = \begin{bmatrix}
+                        100 \\
+                        100
+                     \end{bmatrix} $$
+        Rodando essa função no programa, temos os resultados
+        \begin{table}[h]
+            \centering
+            \begin{tabular}{r|rrrrrrrr}
+                Paraboloid & $\Vert\nabla f_*\Vert$ & it & $f$ & $\nabla f $ & $\nabla^2f$ & armijo & norma & ângulo \\
+                \hline
+                gradquad & 0.63E-05  &       7  &      36   &      8    &     0    &    22    &     0    &     0 \\
+                gradcube & 0.99E-05  &    5926  &   11907   &   5927    &     0    &    55    &     0    &     0 \\
+                bfgsquad & 0.19E-10  &       2  &       9   &      3    &     0    &     5    &     0    &     0 \\
+                bfgscube & 0.16E-07  &       7  &      18   &      8    &     0    &     4    &     0    &     0 \\
+                newtquad & 0.57E-13  &       1  &       2   &      2    &     1    &     0    &     0    &     0 \\
+                newtcube & 0.57E-13  &       1  &       2   &      2    &     1    &     0    &     0    &     0 \\
+            \end{tabular}
+            \caption{Saída do programa para o parabolóide, com $\epsilon = \theta = 10^{-5} $, $\gamma = \sigma = 10^{-4}$.}
+        \end{table}
+        em que fica claro que todos os métodos convergiram para um ponto estacionário (dada a precisão exigida).
+
+        Mas é interessante notar que o método Newton converge em apenas uma iteração, enquanto que os outros não.
+
+        Há diversos fatores que levam a isso, mas os principais são:
+        \begin{enumerate}
+            \item A função é quadrática, ou seja, a aproximação que Newton faz utilizando a hessiana acaba sendo a própria função, e então o método é capaz de escolher a direção que de fato aponta para a solução, permitindo a convergência instantânea.
+            \item O BFGS fica logo atrás, mas como inicialmente ele ainda não tem informação suficiente para aproximar a hessiana, ele não consegue atingir diretamente a solução. Entretanto, ele não demora muito para tal. Nota-se também que a interpolação quadrática é mais eficiente, justamente pela função também o ser.
+            \item O método do gradiente, entretanto, apesar de ter uma boa eficiência com a interpolação quadrática (que faz grande parte do trabalho em minimizar a função), não se dá muito bem com a interpolação cúbica. Isso se dá em grande parte devido à diferença de escalas do problema (o fator 1000 em $x_2$), com a qual esse algorítmo não lida muito bem. E, uma vez removida a contribuição da interpolação, isso se torna bem evidente.
+        \end{enumerate}
+
+        Para mostrar mais claramente a contribuição da diferença de escala para o problema, tomando o parabolóide regular:
+
+        \begin{table}[h!]
+            \centering
+            \begin{tabular}{r|rrrrrrrr}
+                Regular Paraboloid & $\Vert\nabla f_*\Vert$ & it & $f$ & $\nabla f $ & $\nabla^2f$ & armijo & norma & ângulo \\
+                \hline
+                gradquad&  0.00E+00&         1&         3&         2&         0&         1&         0&         0 \\
+                gradcube&  0.00E+00&         1&         3&         2&         0&         1&         0&         0 \\
+                bfgsquad&  0.00E+00&         1&         3&         2&         0&         1&         0&         0 \\
+                bfgscube&  0.00E+00&         1&         3&         2&         0&         1&         0&         0 \\
+                newtquad&  0.80E-13&         1&         2&         2&         1&         0&         0&         0 \\
+                newtcube&  0.80E-13&         1&         2&         2&         1&         0&         0&         0 \\
+            \end{tabular}
+            \caption{Saída do programa para o parabolóide regular, com $\epsilon = \theta = 10^{-5} $, $\gamma = \sigma = 10^{-4}$.}
+        \end{table}
+        ou seja, a interpolação sozinha é capaz de minimizar a função, pois a direção de busca inicial de todos já aponta para a solução.
+
+        \newpage
+        Outro exemplo interessante é o seguinte:
+
+        \begin{table}[h!]
+            \centering
+            \begin{tabular}{r|rrrrrrrr}
+                4 Powell Badly Scaled & $\Vert\nabla f_*\Vert$ & it & $f$ & $\nabla f $ & $\nabla^2f$ & armijo & norma & ângulo \\
+                \hline
+                gradquad&        FC \\
+                gradcube&        FC \\
+                bfgsquad&  0.60E-05&       122&       530&        93&         0&       346&         6&        30 \\
+                bfgscube&  0.91E-05&       309&      1412&       229&         0&       956&        15&        81 \\
+                newtquad&  0.94E-05&       297&       979&       298&       297&       385&       169&       452 \\
+                newtcube&  0.94E-05&       297&       979&       298&       297&       385&       169&       452 \\
+            \end{tabular}
+            \caption{Saída do programa para o problema 4 de Moré-Garbow-Hillstrom (\emph{Powell Badly Scaled}) , com $\epsilon = \theta = 10^{-5} $, $\gamma = \sigma = 10^{-4}$.}
+        \end{table}
+        cuja análise não é tão simples, mas o interessante é que o método do gradiente não convergiu (FC, \emph{failure to converge}, indica que o algorítimo não conseguiu convergir em menos de 1.000.000 avaliações da função objetiva).
+
+        Novamente, como o nome sugere, isso se dá pelas diferenças de escala do problema.
+        Vale também notar que o método de Newton apresenta grandes problemas com a condição do ângulo, pois o melhor que podemos fazer para corrigir isso é criar uma aproximação da hessiana que ``tende'' à identidade (que nos daria a direção de máxima descida), enquanto que o BFGS tem a liberdade de a tomar imediatamente.
+
+        \subsection*{Convergência}
+            Analisando agora a função de Rosenbrock:
+                $$ f(x) = (1 - x_1)^2 + 100(x_2 - x_1^2)^2 $$
+            com os resultados
+
+            \begin{table}[h!]
+                \centering
+                \begin{tabular}{r|rrrrrrrr}
+                    Rosenbrock & $\Vert\nabla f_*\Vert$ & it & $f$ & $\nabla f $ & $\nabla^2f$ & armijo & norma & ângulo \\
+                    \hline
+                    gradquad&  0.99E-05&     10668&     21373&     10669&         0&        37&         0&         0 \\
+                    gradcube&  0.99E-05&     10526&     21093&     10527&         0&        41&         0&         0 \\
+                    bfgsquad&  0.79E-05&       103&       299&        76&         0&       149&         0&        28 \\
+                    bfgscube&  0.67E-05&        32&       151&        27&         0&        99&         0&         6 \\
+                    newtquad&  0.40E-05&        11&        23&        12&        11&         1&         0&        13 \\
+                    newtcube&  0.40E-05&        11&        23&        12&        11&         1&         0&        13 \\
+                \end{tabular}
+                \caption{Saída do programa para a função de Rosenbrock , com $\epsilon = \theta = 10^{-5} $, $\gamma = \sigma = 10^{-4}$.}
+            \end{table}
+            e cujos 11 últimos valores\footnote{No caso, para o método de Newton, são todos os valores da norma do gradiente, já que ele teve somente 11 iterações.} de $\Vert\nabla f(x)\Vert$ para todos os algorítmos com interpolação quadrática são:
+            \begin{table}[h]
+                \centering
+                \begin{tabular}{ccc}
+                    Gradiente & BFGS & Newton \\
+                    \hline
+                    0.0000120 & 0.0107588 & 447.2135955 \\
+                    0.0000280 & 0.0094878 & 176.8260698 \\
+                    0.0000103 & 0.0094878 & 15.9468161 \\
+                    0.0000168 & 0.0003073 & 3.0784906 \\
+                    0.0000230 & 0.0001685 & 5.2304703 \\
+                    0.0000123 & 0.0027361 & 4.5961242 \\
+                    0.0000287 & 0.0015423 & 1.9377240 \\
+                    0.0000105 & 0.0015423 & 1.7015645 \\
+                    0.0000214 & 0.0000150 & 0.3193714 \\
+                    0.0000146 & 0.0003777 & 0.1137346 \\
+                    0.0000271 & 0.0003777 & 0.0017722 \\
+                    0.0000099 & 0.0000079 & 0.0000040
+                \end{tabular}
+            \end{table}
+
+            \newpage
+            podemos observar algumas coisas:
+            \begin{enumerate}
+                \item O método do gradiente não avança muito, apenas flutua um pouco o valor, eventualmente chegando na precisão exigida. Mas, como demonstrado pelo seu número de iterações, demora muito.
+                \item O BFGS já é melhor, começando com um valor três ordens de grandeza maior e ainda assim atingindo uma precisão melhor no mesmo número de iterações. Isso sem contar com os valores duplicados, que são devido à condição do ângulo, a qual força o algoritmo a repetir a iteração com a matriz identidade. Mesmo assim, os valores variam bastante, então é difícil dizer qual sua taxa de convergência.
+                \item Já o método de Newton apresenta de longe a melhor convergência, ainda mais nas últimas três iterações, nas quais a ordem de grandeza dos valores cai quase quadraticamente ($10^{-1}$, $10^{-3}$, $10^{-5}$), que era o esperado.
+            \end{enumerate}
+
+            Entretanto, nem sempre se observam essas diferenças, como no seguinte problema:
+
+            \begin{table}[h!]
+                \centering
+                \begin{tabular}{r|rrrrrrrr}
+                    8 Penalty I & $\Vert\nabla f_*\Vert$ & it & $f$ & $\nabla f $ & $\nabla^2f$ & armijo & norma & ângulo \\
+                    \hline
+                    gradquad&  0.89E-05&         7&        26&         8&         0&        12&         0&         0 \\
+                    gradcube&  0.90E-05&         8&        33&         9&         0&        17&         0&         0 \\
+                    bfgsquad&  0.90E-05&        10&        22&        11&         0&         2&         0&         0 \\
+                    bfgscube&  0.90E-05&        10&        22&        11&         0&         2&         0&         0 \\
+                    newtquad&  0.17E-05&        33&        78&        34&        33&        12&         0&         0 \\
+                    newtcube&  0.17E-05&        33&        78&        34&        33&        12&         0&         0 \\
+                \end{tabular}
+                \caption{Saída do programa para o problema 11 de Moré-Garbow-Hillstrom (\emph{Penalty I}), com $\epsilon = \theta = 10^{-5} $, $\gamma = \sigma = 10^{-4}$.}
+            \end{table}
+            no qual, curiosamente, a ordem dos métodos por número de iterações é o contrário do que se esperaria!
+
+            Além disso, houve também casos patológicos:
+
+            \begin{table}[h!]
+                \centering
+                \begin{tabular}{r|r}
+                    11 Brown and Dennis & $\Vert\nabla f_*\Vert$ \\
+                    \hline
+                    gradquad&        FC \\
+                    gradcube&        FC \\
+                    bfgsquad&       NaN \\
+                    bfgscube&       NaN \\
+                    newtquad&        FC \\
+                    newtcube&        FC \\
+                \end{tabular}
+                \caption{Saída do programa para o problema 11 de Moré-Garbow-Hillstrom (\emph{Brown and Dennis}), com $\epsilon = \theta = 10^{-5} $, $\gamma = \sigma = 10^{-4}$.}
+            \end{table}
+            em que \texttt{NaN} indica que o método convergiu para um ponto que não era estacionário (e portanto aparece um \texttt{NaN} durante o cálculo de $H$). No entanto, não foi econtrada nenhuma referência que explicasse os detalhes dessa função, nem o que levaria o método a isso.
+
+    \section*{Conclusão}
+        Há uma grande liberdade em se adotar estratégias dentro do paradigma de busca linear, e no geral é necessário balancear simplicidade e eficiência. Mesmo assim, isso varia muito com o problema em questão, o que impossibilita a escolha do ``melhor'' método, já que um método supreendentemente pode se mostrar o mais eficaz naquele contexto.
+
+        Mas no geral há métodos que se mostram eficazes em boa parte dos problemas e acabam se tornando padrões, como o BFGS, que evita os problemas do método do gradiente e tem a vantagem de não exigir informações de segunda ordem do problema, como o de Newton.
     \bibliography{EP1}
 \end{document}

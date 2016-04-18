@@ -23,10 +23,10 @@ LFLAGS = -lblas
 
 .PHONY: directories clean tex
 
-$(TARGET): directories $(OBJFILES) $(SRC)runmethods.f08
+$(TARGET): directories $(OBJFILES)
 	$(FC) -I$(OBJ) $(FFLAGS) $(OBJFILES) $(LFLAGS) -o $(TARGET)
 
-$(OBJ)$(TARGET).o: $(TARGET).f08 $(MODFILES)
+$(OBJ)$(TARGET).o: $(TARGET).f08 $(MODFILES) $(SRC)runmethods.f08
 	$(FC) -J$(OBJ) -I$(OBJ) $(FFLAGS) -c $< -o $@
 
 $(OBJ)methods.o $(OBJ)methods.mod: $(SRC)methods.f08 $(OBJ)cholesky.mod $(OBJ)trisys.mod

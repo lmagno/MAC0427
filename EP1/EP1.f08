@@ -40,7 +40,7 @@ program EP1
 
     call printheader()
 
-    !!!!!!!!!!!!!!!!!!!!!!!!!!! Parabolóide !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ! !!!!!!!!!!!!!!!!!!!!!!!!!!! Parabolóide !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     print *, "Paraboloid"
     call initstat()
     call setf(paraf)
