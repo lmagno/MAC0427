@@ -53,7 +53,7 @@ program EP1
     x0(1) = 100
     x0(2) = 100
 
-    INCLUDE 'src/runmethods.f08'
+    INCLUDE 'runmethods.f08'
     deallocate(x)
     deallocate(x0)
 
@@ -70,7 +70,7 @@ program EP1
     x0(1) = 1
     x0(2) = 2
 
-    INCLUDE 'src/runmethods.f08'
+    INCLUDE 'runmethods.f08'
     deallocate(x)
     deallocate(x0)
 
@@ -93,7 +93,7 @@ program EP1
         allocate(x0(n))
         call getinit(x0, factor)
 
-        INCLUDE 'src/runmethods.f08'
+        INCLUDE 'runmethods.f08'
 
         deallocate(x)
         deallocate(x0)
