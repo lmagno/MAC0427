@@ -5,6 +5,7 @@ program EP2
 
     use constrained, only: penalty
     use      stats2, only: f, g, h, &
+                           c, dc, d2c, &
                            setf, setg, seth, &
                            setc, setdc, setd2c, &
                            iteration, armijo, norm, angle, &
@@ -12,7 +13,7 @@ program EP2
 implicit none
     double precision, allocatable :: x(:), x0(:)
     double precision              :: mu, gamma, sigma, theta, eps
-    integer                       :: n, m, p
+    integer                       :: n, m
 
     ! Chamadas do sistema para criar processos independentes
     ! Útil para matar uma conta específica sem afetar as outras
@@ -57,7 +58,7 @@ implicit none
 
         mu    = 10
 
-        call penalty(x, x0, n, m, mu, f, g, h, c1, dc1, d2c1, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
+        call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
         ! print *, mu
         call printstat(x, mu)
         deallocate(x)
@@ -79,7 +80,7 @@ implicit none
 
         mu    = 10
 
-        call penalty(x, x0, n, m, mu, f, g, h, c2, dc2, d2c2, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
+        call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
         ! print *, mu
         call printstat(x, mu)
         deallocate(x)
@@ -100,7 +101,7 @@ implicit none
 
         mu    = 10
 
-        call penalty(x, x0, n, m, mu, f, g, h, c3, dc3, d2c3, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
+        call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
         ! print *, mu
         call printstat(x, mu)
         deallocate(x)

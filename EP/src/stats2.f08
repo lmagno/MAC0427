@@ -3,6 +3,7 @@ module stats2
     save
     private
     public :: f, g, h, &
+              c, dc, d2c, &
               setf, setg, seth, &
               setc, setdc, setd2c, &
               iteration, armijo, norm, angle, &
@@ -183,7 +184,7 @@ contains
     end subroutine angle
 
     subroutine printheader()
-        print '(a22, a16, a10, a12, a13, 2a10, a11)', "‖c(x)‖", "‖∇L‖", "it", "f", "∇f", "∇²f", &
+        print '(a22, a16, a10, a10, a12, a13, a10, a10, a11)', "‖c(x)‖", "‖∇L‖", "it", "f", "∇f", "∇²f", &
                                                            "armijo", "norma", "ângulo"
     end subroutine printheader
 
