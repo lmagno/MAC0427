@@ -13,10 +13,10 @@ implicit none
             double precision             :: f_t
         end function f_t
 
-        function c_t(x)
-            double precision, intent(in) :: x(:)
-            double precision             :: c_t
-        end function c_t
+        subroutine c_t(cx, x)
+            double precision, intent(out) :: cx(:)
+            double precision, intent(in)  :: x(:)
+        end subroutine c_t
     end interface
 
     procedure (f_t), pointer :: f_ptr => null()
@@ -24,8 +24,8 @@ implicit none
 contains
 
     function Q(x)
-        double precision :: x(:)
-        double precision :: Q
+        double precision, intent(in) :: x(:)
+        double precision             :: Q
 
         double precision :: cx(size(x))
 
@@ -54,7 +54,7 @@ contains
         double precision, intent(in)  :: hx(:, :)
         double precision, intent(in)  :: cx(:)
         double precision, intent(in)  :: dcx(:, :)
-        double precision, intent(in)  :: d2cx(:)
+        double precision, intent(in)  :: d2cx(:, :, :)
         integer :: i, j, k
 
         do j = 1, n
@@ -100,12 +100,11 @@ contains
         end do
     end subroutine v
 
-    subroutine newt(x, x0, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
+    subroutine newt(x, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
         ! Saída
-        double precision, intent(out) :: x(:)
+        double precision, intent(inout) :: x(:)
 
         ! Entrada
-        double precision, intent(in) :: x0(:)   ! Ponto inicial
         double precision, intent(in) :: eps     ! Tolerância
         double precision, intent(in) :: gamma   ! γ > 0, Constante para condição de Armijo
         double precision, intent(in) :: sigma   ! σ > 0, constante para condição da norma
@@ -128,10 +127,10 @@ contains
                 double precision, intent(in)  :: x(:)
             end subroutine h
 
-            function c(cx, x)
+            subroutine c(cx, x)
                 double precision, intent(out) :: cx(:)
                 double precision, intent(in)  :: x(:)
-            end function c
+            end subroutine c
 
             subroutine dc(dcx, x)
                 double precision, intent(out) :: dcx(:, :)
@@ -190,7 +189,6 @@ contains
 
 
         ! Valores iniciais
-        x  = x0
         call g(gx, x)
         call c(cx, x)
         call dc(dcx, x)
@@ -292,13 +290,13 @@ contains
 
     subroutine penalty(x, x0, n_, m_, mu_, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
         ! Entrada
-        double precision, intent(in) :: x0(:)   ! Ponto inicial
-        integer,          intent(in) :: n_, m_
-        double precision, intent(in) :: mu_     ! μ > 0, valor inicial para o peso da penalidade
-        double precision, intent(in) :: gamma   ! γ > 0, Constante para condição de Armijo
-        double precision, intent(in) :: sigma   ! σ > 0, constante para condição da norma
-        double precision, intent(in) :: theta   ! Θ > 0, constante para condição do ângulo
-        double precision, intent(in) :: eps     ! Tolerância
+        double precision, intent(in)    :: x0(:)   ! Ponto inicial
+        integer,          intent(in)    :: n_, m_
+        double precision, intent(inout) :: mu_     ! μ > 0, valor inicial para o peso da penalidade
+        double precision, intent(in)    :: gamma   ! γ > 0, Constante para condição de Armijo
+        double precision, intent(in)    :: sigma   ! σ > 0, constante para condição da norma
+        double precision, intent(in)    :: theta   ! Θ > 0, constante para condição do ângulo
+        double precision, intent(in)    :: eps     ! Tolerância
 
         ! Função, gradiente, hessiana e busca linear
         interface
@@ -317,10 +315,10 @@ contains
                 double precision, intent(in)  :: x(:)
             end subroutine h
 
-            function c(cx, x)
+            subroutine c(cx, x)
                 double precision, intent(out) :: cx(:)
                 double precision, intent(in)  :: x(:)
-            end function c
+            end subroutine c
 
             subroutine dc(dcx, x)
                 double precision, intent(out) :: dcx(:, :)
@@ -344,54 +342,31 @@ contains
             subroutine angle()
             end subroutine angle
         end interface
-    end subroutine penalty
 
-    ! Saída
-    double precision, intent(out) :: x(:)
+        ! Saída
+        double precision, intent(out) :: x(:)
 
-    ! Variáveis locais
-    double precision :: cx(m_)
-    double precision :: dcx(m_, n_)
-    double precision :: gx(n_)
-    double precision :: dL(n_) ! ∇L(x, -c(x)/μ) = ∇f(x) + 1/μ*∑cₖ(x)∇cₖ(x)
-    integer          :: i, j, k
-    logical          :: kkt
+        ! Variáveis locais
+        double precision :: cx(m_)
+        double precision :: dcx(m_, n_)
+        double precision :: gx(n_)
+        double precision :: dL(n_) ! ∇L(x, -c(x)/μ) = ∇f(x) + 1/μ*∑cₖ(x)∇cₖ(x)
+        integer          :: i, j, k
+        logical          :: kkt
 
-    n = n_
-    m = m_
-    mu = mu_
-    f_ptr => f
-    c_ptr => c
+        n = n_
+        m = m_
+        mu = mu_
+        f_ptr => f
+        c_ptr => c
 
-    ! Valores iniciais
-    x(:) = x0(:)
-    call c(cx, x)
-    call dc(dcx, x)
-    call g(gx, x)
-
-    ! Lagrangeana
-    dL(:) = gx(:)
-    do k = 1, m
-        do i = 1, n
-            dL(i) = dL(i) + cx(k)*dcx(k, i)/mu
-        end do
-    end do
-
-    if (norm2(cx) < eps .and. norm2(dL) < eps) then
-        kkt = .true.
-    else
-        kkt = .false.
-    end if
-
-    do while(.not. kkt)
-        ! Minimiza Q(x, μ)
-        call newt(x, x0, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
-
-        ! Verifica KKT
+        ! Valores iniciais
+        x(:) = x0(:)
         call c(cx, x)
         call dc(dcx, x)
         call g(gx, x)
 
+        ! Lagrangeana
         dL(:) = gx(:)
         do k = 1, m
             do i = 1, n
@@ -401,10 +376,35 @@ contains
 
         if (norm2(cx) < eps .and. norm2(dL) < eps) then
             kkt = .true.
+        else
+            kkt = .false.
         end if
 
-        ! Atualiza μ
-        mu = mu/2
-    end do
+        do while(.not. kkt)
+            ! Minimiza Q(x, μ)
+            call newt(x, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
+
+            ! Verifica KKT
+            call c(cx, x)
+            call dc(dcx, x)
+            call g(gx, x)
+
+            dL(:) = gx(:)
+            do k = 1, m
+                do i = 1, n
+                    dL(i) = dL(i) + cx(k)*dcx(k, i)/mu
+                end do
+            end do
+
+            if (norm2(cx) < eps .and. norm2(dL) < eps) then
+                kkt = .true.
+            end if
+
+            ! Atualiza μ
+            mu = mu/2
+        end do
+
+        mu_ = mu
+    end subroutine penalty
 
 end module constrained
