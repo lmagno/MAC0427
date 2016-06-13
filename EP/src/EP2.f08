@@ -8,7 +8,7 @@ program EP2
                            c, dc, d2c, &
                            setf, setg, seth, &
                            setc, setdc, setd2c, &
-                           iteration, armijo, norm, angle, &
+                           subproblem, iteration, armijo, norm, angle, &
                            initstat, printheader, printstat, setmethod
 implicit none
     double precision, allocatable :: x(:), x0(:)
@@ -34,7 +34,6 @@ implicit none
     sigma = 1e-4
     theta = 1e-5
     eps   = 1e-6
-    mu    = 10
 
 
     n = 2
@@ -42,7 +41,8 @@ implicit none
 
     allocate(x(n))
     allocate(x0(n))
-    x0(:) = 1
+    x0(1) = 1
+    x0(2) = 1
     call printheader()
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! teste 1 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -56,19 +56,22 @@ implicit none
         call setdc(dc1)
         call setd2c(d2c1)
 
-        mu    = 10
+        mu = 10
+        open(19, file="teste 1", status="unknown", action="write")
+        call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
-        call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
-        ! print *, mu
         call printstat(x, mu)
+
         deallocate(x)
         deallocate(x0)
 
+        close(19)
         call exit(0)
     end if
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! teste 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if(fork() == 0) then
+        m = 2
         call initstat(n, m)
         call setmethod("teste 2")
         call setf(testf2)
@@ -78,17 +81,21 @@ implicit none
         call setdc(dc2)
         call setd2c(d2c2)
 
-        mu    = 10
+        mu = 10
 
-        call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
-        ! print *, mu
+        open(19, file="teste 2", status="unknown", action="write")
+        call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
+
         call printstat(x, mu)
+
         deallocate(x)
         deallocate(x0)
 
+        close(19)
         call exit(0)
     end if
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! teste 1 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! teste 3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if(fork() == 0) then
         call initstat(n, m)
         call setmethod("teste 3")
@@ -99,14 +106,17 @@ implicit none
         call setdc(dc3)
         call setd2c(d2c3)
 
-        mu    = 10
+        mu = 10
 
-        call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
-        ! print *, mu
+        open(19, file="teste 3", status="unknown", action="write")
+        call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
+
         call printstat(x, mu)
+
         deallocate(x)
         deallocate(x0)
 
+        close(19)
         call exit(0)
     end if
 

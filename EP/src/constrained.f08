@@ -288,7 +288,8 @@ contains
         end do
     end subroutine newt
 
-    subroutine penalty(x, x0, n_, m_, mu_, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
+    subroutine penalty(x, x0, n_, m_, mu_, f, g, h, c, dc, d2c, &
+                        gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
         ! Entrada
         double precision, intent(in)    :: x0(:)   ! Ponto inicial
         integer,          intent(in)    :: n_, m_
@@ -329,6 +330,9 @@ contains
                 double precision, intent(out) :: d2cx(:, :, :)
                 double precision, intent(in)  :: x(:)
             end subroutine d2c
+
+            subroutine subproblem()
+            end subroutine subproblem
 
             subroutine iteration()
             end subroutine iteration
@@ -374,6 +378,7 @@ contains
             end do
         end do
 
+        write (19, *), x
         if (norm2(cx) < eps .and. norm2(dL) < eps) then
             kkt = .true.
         else
@@ -382,6 +387,7 @@ contains
 
         do while(.not. kkt)
             ! Minimiza Q(x, μ)
+            call subproblem()
             call newt(x, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, iteration, armijo, norm, angle)
 
             ! Verifica KKT
@@ -396,6 +402,7 @@ contains
                 end do
             end do
 
+            write (19, *), x
             if (norm2(cx) < eps .and. norm2(dL) < eps) then
                 kkt = .true.
             else

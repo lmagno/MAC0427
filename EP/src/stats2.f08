@@ -6,7 +6,7 @@ module stats2
               c, dc, d2c, &
               setf, setg, seth, &
               setc, setdc, setd2c, &
-              iteration, armijo, norm, angle, &
+              subproblem, iteration, armijo, norm, angle, &
               initstat, printheader, printstat, setmethod
 
     interface
@@ -50,7 +50,7 @@ module stats2
     procedure (d2c_t), pointer :: d2c_ptr => null()
 
     integer          :: n, m
-    integer          :: nit, narm, nnor, nang
+    integer          :: nsub, nit, narm, nnor, nang
     integer          :: nf, ng, nh
     integer          :: nc, ndc, nd2c
     character(len=8) :: method
@@ -61,7 +61,8 @@ contains
 
         n = n_
         m = m_
-        nit = 0
+        nsub = 0
+        nit  = 0
         narm = 0
         nnor = 0
         nang = 0
@@ -114,11 +115,6 @@ contains
 
         nf = nf + 1
 
-        if (nf > 1000000) then
-            print '(a8, a10)', method, "FC"
-            call exit(1)
-        end if
-
         f = f_ptr(x)
     end function f
 
@@ -167,8 +163,18 @@ contains
         call d2c_ptr(d2cx, x)
     end subroutine d2c
 
+    subroutine subproblem()
+        nsub = nsub + 1
+        nit = 0
+    end subroutine subproblem
+
     subroutine iteration()
         nit = nit + 1
+
+        if (nit > 1000000) then
+            print '(a8, a10)', method, "FC"
+            call exit(1)
+        end if
     end subroutine iteration
 
     subroutine armijo()
