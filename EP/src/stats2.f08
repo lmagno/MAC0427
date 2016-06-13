@@ -54,8 +54,6 @@ module stats2
     integer          :: nc, ndc, nd2c
     character(len=8) :: method
 
-    double precision, allocatable :: gx(:)
-
 contains
     subroutine initstat(n_, m_)
         integer, intent(in) :: n_, m_
@@ -116,7 +114,7 @@ contains
         nf = nf + 1
 
         if (nf > 1000000) then
-            print '(a18, a10)', method, "FC"
+            print '(a8, a10)', method, "FC"
             call exit(1)
         end if
 

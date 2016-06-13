@@ -398,10 +398,10 @@ contains
 
             if (norm2(cx) < eps .and. norm2(dL) < eps) then
                 kkt = .true.
+            else
+                ! Atualiza μ
+                mu = mu/2
             end if
-
-            ! Atualiza μ
-            mu = mu/2
         end do
 
         mu_ = mu
