@@ -1,6 +1,0 @@
-set term pdfcairo size 10, 5
-set output "teste2.pdf"
-
-plot "teste2.dat" pt 7 ps 1
-
-set output

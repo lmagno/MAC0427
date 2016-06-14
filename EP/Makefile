@@ -2,6 +2,7 @@ SRC = ./src/
 OBJ = ./obj/
 TEX = ./tex/
 AUX = ./aux/
+DATA = ./data/
 
 MGHSUB    = INITPT OBJFCN GRDFCN HESFCN
 MGHFILES += $(addprefix $(SRC), $(MGHSUB:=.f))
@@ -48,22 +49,25 @@ $(OBJ)%.o $(OBJ)%.mod: $(SRC)%.f08
 $(OBJ)%.o: $(SRC)%.f
 	$(FC) -c $< -o $@
 
-tex: directories
+tex:
+	mkdir -p $(AUX); \
 	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)EP1.tex && \
 	cp $(TEX)EP1.bib $(AUX) && cd $(AUX) && bibtex EP1 && cd - && \
 	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)EP1.tex && \
 	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)EP1.tex && \
 	mv $(AUX)EP1.pdf ./
 
-tex2: $(TEX)EP2.tex
-	rubber -d --unsafe --inplace $(TEX)EP2.tex; \
-	mv $(TEX)EP2.pdf .
+tex2: $(AUX)teste1.tex $(AUX)teste1.eps $(AUX)teste2.tex $(AUX)teste2.eps
+	rubber -d --unsafe --into $(AUX) $(TEX)EP2.tex; \
+	mv $(AUX)EP2.pdf .
+
+$(AUX)%.tex $(AUX)%.eps: $(DATA)%.gp
+	cd $(DATA); \
+	gnuplot $*.gp; \
+	mv $*.tex $*.eps .$(AUX)
 
 directories:
 	mkdir -p $(OBJ)
 
 clean:
-	rm -rf EP1 $(OBJ) $(AUX)
-	rubber --clean -d --unsafe --inplace $(TEX)EP2.tex
-	rm -rf $(TEX)gnuplottex
-	rm -rf $(TEX)EP2.gnuploterrors
+	rm -rf EP1 $(OBJ) $(AUX)*
