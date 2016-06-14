@@ -57,7 +57,7 @@ implicit none
         call setd2c(d2c1)
 
         mu = 10
-        open(19, file="teste 1", status="unknown", action="write")
+        open(19, file="data/teste1.dat", status="unknown", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -83,7 +83,7 @@ implicit none
 
         mu = 10
 
-        open(19, file="teste 2", status="unknown", action="write")
+        open(19, file="data/teste2.dat", status="unknown", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -108,7 +108,7 @@ implicit none
 
         mu = 10
 
-        open(19, file="teste 3", status="unknown", action="write")
+        open(19, file="data/teste3.dat", status="unknown", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)

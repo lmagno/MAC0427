@@ -190,7 +190,7 @@ contains
     end subroutine angle
 
     subroutine printheader()
-        print '(a22, a16, a10, a10, a12, a13, a10, a10, a11)', "‖c(x)‖", "‖∇L‖", "it", "f", "∇f", "∇²f", &
+        print '(a22, a16, a10, a10, a12, a13, a10, a10, a11)', "‖c(x)‖", "‖∇L‖", "sub", "f", "∇f", "∇²f", &
                                                            "armijo", "norma", "ângulo"
     end subroutine printheader
 
@@ -220,7 +220,7 @@ contains
                 dL(i) = dL(i) + cx(k)*dcx(k, i)/mu
             end do
         end do
-        print '(a8, 2e10.2, 7i10)', method, norm2(cx), norm2(dL), nit, nf, ng, nh, narm, nnor, nang
+        print '(a8, 2e10.2, 7i10)', method, norm2(cx), norm2(dL), nsub, nf, ng, nh, narm, nnor, nang
 
         deallocate(cx)
         deallocate(dcx)

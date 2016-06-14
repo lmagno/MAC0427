@@ -1,0 +1,101 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[left=2.5cm,right=2.5cm,top=2.0cm,bottom=1.5cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{indentfirst}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{txfonts} % Para usar o símbolo dos números reais (\varmathbb{R})
+\usepackage[brazilian]{babel}
+% \usepackage{natbib}
+% \bibliographystyle{plainnat}
+\usepackage{enumitem}
+\usepackage{dirtree}
+\usepackage{import}
+\usepackage{epstopdf}
+\usepackage[subfolder]{gnuplottex}
+\setlist[description]{leftmargin=2\parindent,labelindent=2\parindent}
+
+\date{}
+\author{Lucas Magno \\ 7994983}
+\title{Programação Não-Linear \\ Algoritmos de Busca Linear}
+
+\begin{document}
+
+    \begin{figure}
+        \centering
+        \begin{gnuplot}[terminal=epslatex,terminaloptions=]
+            min = -1
+            max = 2
+            set xrange [min:max]
+            set yrange [min:max]
+
+            unset border
+
+            set xzeroaxis lt -1 lw 3
+            set xtics axis (1)
+            set label "$x$" at max-0.1,-.1
+
+            set yzeroaxis lt -1 lw 3
+            set ytics axis (1)
+            set label "$y$" at -.1,max-0.1
+
+
+            set label "$(\\frac{1}{2},\\frac{1}{2})$" at 0.55,0.55 left
+            set size square
+            plot "../data/teste1.dat" pt 7 ps 0.5 title "", \
+                 1-x w lines lw 3 title "$x + y = 1$"
+        \end{gnuplot}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \begin{gnuplot}[terminal=epslatex,terminaloptions=]
+            xmin = -1
+            xmax = 3
+            ymin = -2
+            ymax = 2
+            set xrange [xmin:xmax]
+            set yrange [ymin:ymax]
+
+            set key tmargin
+            unset border
+
+            set cntrparam levels discrete 0
+            set view map
+            unset surface
+            set isosamples 1000,1000
+            set contour
+
+            c1(x, y) = (x-1)**2 + (y-1)**2 - 1
+            c2(x, y) = (x-1)**2 + (y+1)**2 - 1
+
+            set table 'gnuplottex/c1_2'
+            splot c1(x, y)
+            unset table
+
+            set table 'gnuplottex/c2_2'
+            splot c2(x, y)
+            unset table
+
+            set xzeroaxis lt -1 lw 3
+            set xtics axis (1)
+            set label "$x$" at xmax-0.1,-.1
+
+            set yzeroaxis lt -1 lw 3
+            unset ytics
+            set label "$y$" at -.1,ymax-0.1 right
+
+
+            set size square
+            plot "../data/teste2.dat" pt 1 ps 1 t "", \
+                 "../data/c1_2" u 1:2 title "$(x-1)^2+(y-1)^2 = 1$" w lines lw 3,\
+                 "../data/c2_2" u 1:2 title "$(x-1)^2+(y+1)^2 = 1$" w lines lw 3
+        \end{gnuplot}
+    \end{figure}
+\end{document}

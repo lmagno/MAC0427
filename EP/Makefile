@@ -19,7 +19,7 @@ FC = gfortran
 FFLAGS = -Wall -g
 LFLAGS = -lblas
 
-.PHONY: directories clean tex
+.PHONY: directories clean tex tex2
 
 EP1: directories $(OBJFILES)
 	$(FC) -I$(OBJ) $(FFLAGS) $(OBJFILES) $(LFLAGS) -o EP1
@@ -48,16 +48,22 @@ $(OBJ)%.o $(OBJ)%.mod: $(SRC)%.f08
 $(OBJ)%.o: $(SRC)%.f
 	$(FC) -c $< -o $@
 
-directories:
-	mkdir -p $(OBJ)
-
-clean:
-	rm -rf EP1 $(OBJ) $(AUX)
-
-tex:
-	mkdir -p $(AUX); \
+tex: directories
 	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)EP1.tex && \
 	cp $(TEX)EP1.bib $(AUX) && cd $(AUX) && bibtex EP1 && cd - && \
 	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)EP1.tex && \
 	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)EP1.tex && \
 	mv $(AUX)EP1.pdf ./
+
+tex2: $(TEX)EP2.tex
+	rubber -d --unsafe --inplace $(TEX)EP2.tex; \
+	mv $(TEX)EP2.pdf .
+
+directories:
+	mkdir -p $(OBJ)
+
+clean:
+	rm -rf EP1 $(OBJ) $(AUX)
+	rubber --clean -d --unsafe --inplace $(TEX)EP2.tex
+	rm -rf $(TEX)gnuplottex
+	rm -rf $(TEX)EP2.gnuploterrors
