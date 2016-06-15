@@ -86,34 +86,25 @@ contains
         double precision, intent(out) :: cx(:)
         double precision, intent(in)  :: x(:)
 
-        cx(1) = (x(1) - 1)**2 + (x(2) - 1)**2 - 1
-        cx(2) = (x(1) - 1)**2 + (x(2) + 1)**2 - 1
+        cx(1) = (x(1) + x(2) - 1)**3
     end subroutine c2
 
     subroutine dc2(dcx, x)
         double precision, intent(out) :: dcx(:, :)
         double precision, intent(in)  :: x(:)
 
-        dcx(1, 1) = 2*(x(1) - 1)
-        dcx(1, 2) = 2*(x(2) - 1)
-
-        dcx(2, 1) = 2*(x(1) - 1)
-        dcx(2, 2) = 2*(x(2) + 1)
+        dcx(1, 1) = 3*(x(1) + x(2) - 1)**2
+        dcx(1, 2) = 3*(x(1) + x(2) - 1)**2
     end subroutine dc2
 
     subroutine d2c2(d2cx, x)
         double precision, intent(out) :: d2cx(:, :, :)
         double precision, intent(in)  :: x(:)
 
-        d2cx(1, 1, 1) = 2
-        d2cx(1, 1, 2) = 0
-        d2cx(1, 2, 1) = 0
-        d2cx(1, 2, 2) = 2
-
-        d2cx(2, 1, 1) = 2
-        d2cx(2, 1, 2) = 0
-        d2cx(2, 2, 1) = 0
-        d2cx(2, 2, 2) = 2
+        d2cx(1, 1, 1) = 6*(x(1) + x(2) - 1)
+        d2cx(1, 1, 2) = 6*(x(1) + x(2) - 1)
+        d2cx(1, 2, 1) = 6*(x(1) + x(2) - 1)
+        d2cx(1, 2, 2) = 6*(x(1) + x(2) - 1)
     end subroutine d2c2
 
     function testf3(x)
@@ -148,18 +139,84 @@ contains
         double precision, intent(out) :: cx(:)
         double precision, intent(in)  :: x(:)
 
-        cx(1) = (x(1) + x(2) - 1)**2
+        cx(1) = x(1) - 1
+        cx(2) = x(2)
     end subroutine c3
 
     subroutine dc3(dcx, x)
         double precision, intent(out) :: dcx(:, :)
         double precision, intent(in)  :: x(:)
 
-        dcx(1, 1) = 2*(x(1) + x(2) - 1)
-        dcx(1, 2) = 2*(x(1) + x(2) - 1)
+        dcx(1, 1) = 1
+        dcx(1, 2) = 0
+
+        dcx(2, 1) = 0
+        dcx(2, 2) = 1
     end subroutine dc3
 
     subroutine d2c3(d2cx, x)
+        double precision, intent(out) :: d2cx(:, :, :)
+        double precision, intent(in)  :: x(:)
+
+        d2cx(1, 1, 1) = 0
+        d2cx(1, 1, 2) = 0
+        d2cx(1, 2, 1) = 0
+        d2cx(1, 2, 2) = 0
+
+        d2cx(2, 1, 1) = 0
+        d2cx(2, 1, 2) = 0
+        d2cx(2, 2, 1) = 0
+        d2cx(2, 2, 2) = 0
+    end subroutine d2c3
+
+    function testf4(x)
+        double precision, intent(in) :: x(:)
+        double precision             :: testf4
+
+        testf4 = sum(x**2)
+    end function testf4
+
+    subroutine testg4(gx, x)
+        double precision, intent(out) :: gx(:)
+        double precision, intent(in)  :: x(:)
+
+        gx(:) = 2*x(:)
+    end subroutine testg4
+
+    subroutine testh4(hx, x)
+        double precision, intent(out) :: hx(:, :)
+        double precision, intent(in)  :: x(:)
+
+        integer :: i, n
+        n = size(x)
+
+        hx(:, :) = 0.d0
+        do i = 1, n
+            hx(i, i) = 2
+        end do
+    end subroutine testh4
+
+    ! x1 + x2 - 1 = 0
+    subroutine c4(cx, x)
+        double precision, intent(out) :: cx(:)
+        double precision, intent(in)  :: x(:)
+
+        cx(1) = (x(1) - 1)**2 + (x(2) - 1)**2 - 1
+        cx(2) = (x(1) - 1)**2 + (x(2) + 1)**2 - 1
+    end subroutine c4
+
+    subroutine dc4(dcx, x)
+        double precision, intent(out) :: dcx(:, :)
+        double precision, intent(in)  :: x(:)
+
+        dcx(1, 1) = 2*(x(1) - 1)
+        dcx(1, 2) = 2*(x(2) - 1)
+
+        dcx(2, 1) = 2*(x(1) - 1)
+        dcx(2, 2) = 2*(x(2) + 1)
+    end subroutine dc4
+
+    subroutine d2c4(d2cx, x)
         double precision, intent(out) :: d2cx(:, :, :)
         double precision, intent(in)  :: x(:)
 
@@ -167,5 +224,12 @@ contains
         d2cx(1, 1, 2) = 0
         d2cx(1, 2, 1) = 0
         d2cx(1, 2, 2) = 2
-    end subroutine d2c3
+
+        d2cx(2, 1, 1) = 2
+        d2cx(2, 1, 2) = 0
+        d2cx(2, 2, 1) = 0
+        d2cx(2, 2, 2) = 2
+    end subroutine d2c4
+
+
 end module test

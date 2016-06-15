@@ -1,8 +1,5 @@
 program EP2
-    use        test, only: testf1, testg1, testh1, c1, dc1, d2c1, &
-                           testf2, testg2, testh2, c2, dc2, d2c2, &
-                           testf3, testg3, testh3, c3, dc3, d2c3
-
+    use        test
     use constrained, only: penalty
     use      stats2, only: f, g, h, &
                            c, dc, d2c, &
@@ -13,7 +10,7 @@ program EP2
 implicit none
     double precision, allocatable :: x(:), x0(:)
     double precision              :: mu, gamma, sigma, theta, eps
-    integer                       :: n, m
+    integer                       :: n, m, i
 
     ! Chamadas do sistema para criar processos independentes
     ! Útil para matar uma conta específica sem afetar as outras
@@ -58,6 +55,7 @@ implicit none
 
         mu = 10
         open(19, file="data/teste1.dat", status="unknown", action="write")
+        open(38, file="data/teste1_lagrangean.dat", status="unknown", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -66,12 +64,13 @@ implicit none
         deallocate(x0)
 
         close(19)
+        close(38)
         call exit(0)
     end if
+    i = wait(i)
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! teste 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if(fork() == 0) then
-        m = 2
         call initstat(n, m)
         call setmethod("teste 2")
         call setf(testf2)
@@ -84,6 +83,7 @@ implicit none
         mu = 10
 
         open(19, file="data/teste2.dat", status="unknown", action="write")
+        open(38, file="data/teste2_lagrangean.dat", status="unknown", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -92,11 +92,14 @@ implicit none
         deallocate(x0)
 
         close(19)
+        close(38)
         call exit(0)
     end if
+    i = wait(i)
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! teste 3 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if(fork() == 0) then
+        m = 2
         call initstat(n, m)
         call setmethod("teste 3")
         call setf(testf3)
@@ -109,6 +112,7 @@ implicit none
         mu = 10
 
         open(19, file="data/teste3.dat", status="unknown", action="write")
+        open(38, file="data/teste3_lagrangean.dat", status="unknown", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -117,8 +121,40 @@ implicit none
         deallocate(x0)
 
         close(19)
+        close(38)
         call exit(0)
     end if
+    i = wait(i)
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! teste 4 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if(fork() == 0) then
+        m = 2
+        call initstat(n, m)
+        call setmethod("teste 4")
+        call setf(testf4)
+        call setg(testg4)
+        call seth(testh4)
+        call setc(c4)
+        call setdc(dc4)
+        call setd2c(d2c4)
+
+        mu = 10
+
+        open(19, file="data/teste4.dat", status="unknown", action="write")
+        open(38, file="data/teste4_lagrangean.dat", status="unknown", action="write")
+        call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
+
+        call printstat(x, mu)
+
+        deallocate(x)
+        deallocate(x0)
+
+        close(19)
+        close(38)
+        call exit(0)
+    end if
+    i = wait(i)
 
     call sleep(1)
+
 end program EP2

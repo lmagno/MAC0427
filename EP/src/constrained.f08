@@ -403,6 +403,7 @@ contains
             end do
 
             write (19, *), x
+            write (38, *), norm2(cx), norm2(dL)
             if (norm2(cx) < eps .and. norm2(dL) < eps) then
                 kkt = .true.
             else

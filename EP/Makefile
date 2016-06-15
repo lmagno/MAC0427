@@ -57,11 +57,14 @@ tex:
 	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)EP1.tex && \
 	mv $(AUX)EP1.pdf ./
 
-tex2: $(AUX)teste1.tex $(AUX)teste1.eps $(AUX)teste2.tex $(AUX)teste2.eps
+TESTS := teste1 teste3 teste4
+TESTS := $(addprefix $(AUX), $(TESTS))
+
+tex2: $(TESTS:=.tex) $(TESTS:=.eps)
 	rubber -d --unsafe --into $(AUX) $(TEX)EP2.tex; \
 	mv $(AUX)EP2.pdf .
 
-$(AUX)%.tex $(AUX)%.eps: $(DATA)%.gp
+$(AUX)%.tex $(AUX)%.eps: $(DATA)%.gp $(DATA)%.dat
 	cd $(DATA); \
 	gnuplot $*.gp; \
 	mv $*.tex $*.eps .$(AUX)
