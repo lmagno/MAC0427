@@ -57,7 +57,7 @@ tex:
 	pdflatex -halt-on-error -output-directory $(AUX) $(TEX)EP1.tex && \
 	mv $(AUX)EP1.pdf ./
 
-TESTS := teste1 teste3 teste4
+TESTS := teste1 teste2 teste3 teste4
 TESTS := $(addprefix $(AUX), $(TESTS))
 
 tex2: $(TESTS:=.tex) $(TESTS:=.eps)

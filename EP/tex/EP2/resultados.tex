@@ -1,14 +1,187 @@
-\begin{figure}[h]
-	\centering
-	\input{teste1}
-\end{figure}
+Foram escolhidos quatro problemas para testar o programa, definidos no $\varmathbb{R}^2$
+a fim de ilustração, cujos resultados foram:
 
-\begin{figure}[h]
-	\centering
-	\input{teste3}
-\end{figure}
+\begin{table}[h!]
+    \centering
+	\label{tab:resultados}
+    \begin{tabular}{r|rrrrrrrrr}
+         & $\Vert c^*\Vert$ & $\Vert\nabla \mathcal{L}^*\Vert$ & sub & $f$ & $\nabla f $ & $\nabla^2f$ & armijo & norma & ângulo \\
+        \hline
+        \subimport{../../data/}{output.dat}
+    \end{tabular}
+    \caption{Saída do programa para os quatro problemas testados, com
+	$\epsilon = 10^{-6}$, $\theta = 10^{-5} $, $\gamma = \sigma = 10^{-4}$ e
+	ponto inicial $(1, 1)$.}
+\end{table}
 
-\begin{figure}[h]
-	\centering
-	\input{teste4}
-\end{figure}
+E a seguir vamos analisar cada um.
+
+\subsection{Não-Linearidade das restrições}
+    Os problemas 1 e 2 são, respectivamente
+
+    \noindent\begin{minipage}{.5\linewidth}
+        \begin{equation*}
+			\begin{aligned}
+				& \text{minimizar} & & x^2 + y^2 \\
+				& \text{sujeita a} & & x + y - 1 = 0
+			\end{aligned}
+        \end{equation*}
+    \end{minipage}%
+    \begin{minipage}{.5\linewidth}
+        \begin{equation*}
+			\begin{aligned}
+				& \text{minimizar} & & x^2 + y^2 \\
+				& \text{sujeita a} & & (x + y - 1)^3 = 0
+			\end{aligned}
+        \end{equation*}
+    \end{minipage}
+
+	Ou seja, ambos consistem em achar o ponto da reta $x + y = 1$ mais próximo
+	à origem e a única diferença entre eles é que a restrição é linear no primeiro,
+	mas não no segundo.
+
+	Visualizando o progresso do algoritmo através dos gráficos
+
+	\noindent\begin{figure}[h!]
+		\noindent\begin{minipage}[l]{.45\linewidth}
+			\scalebox{.7}{\input{teste1}}
+			\caption{Sequência de soluções $x_k$ para o problema 1.}
+		\end{minipage}%
+		\hspace{0.1\linewidth}%
+		\begin{minipage}[l]{.45\linewidth}
+			\scalebox{.7}{\input{teste2}}
+			\caption{Sequência de soluções $x_k$ para o problema 2.}
+		\end{minipage}
+	\end{figure}
+
+	fica claro que ambos chegam à mesma solução de forma similar. No entanto, tanto pelo gráfico
+	quanto pela tabela de resultados \ref{tab:resultados}, nota-se que o segundo caso resolve um número
+	maior de subproblemas e ainda assim termina com uma precisão pior do que o primeiro,
+	então restrições não-lineares introduzem uma certa dificuldade comparadas às
+	lineares para este algoritmo.
+
+\subsection{LICQ}
+	Para ilustrar a necessidade da LICQ para o método, dois outros problemas
+	foram testados:
+
+	\noindent\begin{minipage}{.5\linewidth}
+		\begin{equation*}
+			\begin{aligned}
+				& \text{minimizar} & & x^2 + y^2 \\
+				& \text{sujeita a} & & x = 1 \\
+				&  & & y = 0
+			\end{aligned}
+		\end{equation*}
+	\end{minipage}%
+	\begin{minipage}{.5\linewidth}
+		\begin{equation*}
+			\begin{aligned}
+				& \text{minimizar} & & x^2 + y^2 \\
+				& \text{sujeita a} & & (x-1)^2+(y-1)^2 = 1 \\
+				&  & & (x-1)^2+(y+1)^2 = 1
+			\end{aligned}
+		\end{equation*}
+	\end{minipage}
+
+	nos quais em ambos a região viável se restringe a um único ponto, $x^* = (1, 0)$,
+	e cujos gradientes da função e das restrições nesse ponto são, respectivamente:
+
+	\begin{equation*}
+		\nabla f(x^*) =
+		\begin{bmatrix}
+			2 \\
+			0
+		\end{bmatrix},\quad
+		\nabla c_1(x^*) =
+		\begin{bmatrix}
+			1 \\
+			0
+		\end{bmatrix},\quad
+		\nabla c_2(x^*) =
+		\begin{bmatrix}
+			0 \\
+			1
+		\end{bmatrix}
+	\end{equation*}
+
+	\begin{equation*}
+		\nabla f(x^*) =
+		\begin{bmatrix}
+			2 \\
+			0
+		\end{bmatrix},\quad
+		\nabla c_1(x^*) =
+		\begin{bmatrix}
+			0 \\
+			-2
+		\end{bmatrix},\quad
+		\nabla c_2(x^*) =
+		\begin{bmatrix}
+			0 \\
+			2
+		\end{bmatrix}
+	\end{equation*}
+
+	em que fica claro que, enquanto os gradientes das restrições do primeiro são
+	linearmente independente, os do segundo não o são.
+
+	Novamente, podemos observar os gráficos:
+
+	\noindent\begin{figure}[h!]
+		\noindent\begin{minipage}[l]{.45\linewidth}
+			\scalebox{.7}{\input{teste3}}
+			\caption{Sequência de soluções $x_k$ para o problema 3.}
+		\end{minipage}%
+		\hspace{0.1\linewidth}%
+		\begin{minipage}[l]{.45\linewidth}
+			\scalebox{.7}{\input{teste4}}
+			\caption{Sequência de soluções $x_k$ para o problema 4.}
+		\end{minipage}
+	\end{figure}
+
+	e se nota que ambos se aproximam da solução $x^*$. Apesar disso, como visto
+	na tabela \ref{tab:resultados}, o programa não converge para o problema 4.
+
+	A partir da evolução dos valores dos critérios de parada para os últimos pontos
+	do algoritmo em ambos os problemas
+	\begin{table}[h!]
+		\centering
+		\begin{minipage}{.45\linewidth}
+			\centering
+			\begin{tabular}{cc}
+				$\| c(x) \|$ & $\| \nabla \mathcal{L}(x) \|$ \\
+				\hline
+				0.95E-05 &   0.54E-06 \\
+				0.48E-05 &   0.11E-11 \\
+				0.24E-05 &   0.11E-10 \\
+				0.12E-05 &   0.28E-11 \\
+				0.60E-06 &   0.91E-06 \\
+			\end{tabular}
+			\caption{Valores dos critérios de parada para a sequência $x_k$ do problema 3.}
+		\end{minipage}%
+		\hspace{0.1\linewidth}%
+		\begin{minipage}[r]{.45\linewidth}
+			\centering
+			\begin{tabular}{cc}
+				$\| c(x) \|$ & $\| \nabla \mathcal{L}(x) \|$ \\
+				\hline
+				0.10E-03 &   0.11E-07 \\
+				0.63E-04 &   0.20E-06 \\
+				0.40E-04 &   0.31E-06 \\
+				0.25E-04 &   0.53E-06 \\
+				0.16E-04 &   0.32E-07 \\
+			\end{tabular}
+			\caption{Valores dos critérios de parada para a sequência $x_k$ do problema 4.}
+		\end{minipage}
+	\end{table}
+
+	somado ao fato de que o programa resolveu 26 subproblemas para o problema 3 e
+	28 para o 4 (embora não esteja informado na tabela \ref{tab:resultados}),
+	observa-se que a convergência se dá muito mais rapidamente para o primeiro,
+	e é possível ver o ponto em que atinge a região viável, na qual vale a condição
+	de parada (dentro da tolerância).
+
+	Para o segundo problema, porém, o algoritmo
+	acaba não alcançando a região viável, pois, conforme ele se aproxima dela,
+	os gradientes das restrições se tornam linearmente dependentes, de forma que
+	não seja possível anular o gradiente da Lagrangeana.

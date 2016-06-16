@@ -24,6 +24,14 @@ $$ x_{k+1}^S \gets x_k$$
 $$ \mu_{k+1} \gets \mu_k/2$$
 onde $\epsilon$ é a tolerância definida para o programa.
 
+Além disso, definimos `` satisfazer o critério \ref{eq:parada}'' como
+\begin{equation*}
+    \begin{aligned}
+        \| c(x) \| & \leq \epsilon \quad \text{(viabilidade)} \\
+        \| \nabla \mathcal{L}(x) \| & \leq \epsilon \quad \text{(otimalidade)}
+    \end{aligned}
+\end{equation*}
+
 \subsection{Mal condicionamento}
     Como método no primeiro passo foi escolhido o de Newton, no entanto é necessário
     uma observação. Para encontrar uma direção de descida $d$, o método resolve um sistema
