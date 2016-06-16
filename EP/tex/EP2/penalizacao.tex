@@ -1,0 +1,33 @@
+Mas como lidar com as restrições? A solução simples é não lidar com elas! \citep{Friedlander94}
+Quer dizer, podemos definir o seguinte problema irrestrito
+
+\begin{equation}
+    \label{eq:subproblema}
+    \underset{x \in \varmathbb{R}^n}{\text{minimizar}} \quad Q(x, \mu) = f(x) + \frac{1}{2\mu}\sum_{i = 0}^m c_i(x)^2
+\end{equation}
+para dado $\mu \in \varmathbb{R}$, no qual pontos fora da região viável recebem uma \emph{penalidade} com peso
+$1/2\mu$ e assim, para $\mu$ suficientemente grande, espera-se que o algoritmo
+descarte pontos fora da região viável.
+
+De fato, pode-se mostrar que, sendo a sequência $\{ \mu_k\}_{k=0}^\infty$ tal que
+
+\begin{equation}
+    \mu_k \rightarrow 0 \quad (k \rightarrow \infty)
+\end{equation}
+então a sequência $\{x_k\}_{k = 0}^\infty$ de soluções dos subproblemas
+\begin{equation*}
+    \underset{x \in \varmathbb{R}^n}{\text{minimizar}} \quad Q(x, \mu_k)
+\end{equation*}
+tende a $x^*$, que é solução do problema \ref{eq:problema}.
+
+No entanto, isso requer a solução exata do subproblema \ref{eq:subproblema}.
+Por outro lado, se tivermos $x_k$ tal que
+\begin{equation*}
+    \| \nabla Q(x_k, \mu_k)\| \leq r_k, \quad r_k \in \varmathbb{R}
+\end{equation*}
+e
+$$ r_k \rightarrow 0$$
+também é possível mostrar que $x_k \rightarrow x^*$ e
+$$ \lambda_i^k = -\frac{c_i(x_k)}{\mu_k} \rightarrow \lambda_i^* \quad i = 1, m$$
+o que é muito mais útil
+de um ponto de vista prático.

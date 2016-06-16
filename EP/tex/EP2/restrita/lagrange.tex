@@ -15,7 +15,11 @@ Assim, podemos agora enunciar a condição necessária de primeira ordem \citep{
     então existe $\lambda^* \in \varmathbb{R}^m$ tal que
 
     \begin{equation}
-        \nabla f(x^*) = \sum_{i = 0}^{m} \lambda_i^* \nabla c_i(x^*)
+        \label{eq:parada}
+        \begin{aligned}
+            \nabla \mathcal{L}(x^*) &= \nabla f(x^*) - \sum_{i = 0}^{m} \lambda_i^* \nabla c_i(x^*) \\
+                                  &= 0
+        \end{aligned}
     \end{equation}
 
     onde $\lambda^*$ é conhecido como o vetor de multiplicadores de langrange.

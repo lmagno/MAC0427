@@ -1,0 +1,28 @@
+Para implementação do algoritmo foi feito um programa em \texttt{FORTRAN 2008},
+usando como base o código já desenvolvido anteriormente, portanto aqui só serão
+mencionadas as adições referentes a este trabalho.
+
+\subsection{Módulos}
+    Os módulos novos criados foram:
+
+    \begin{description}
+        \item[\texttt{constrained}] Implementa o método de penalização bem como o de Newton modificado.
+        \item[\texttt{stats2}] Fornece \emph{wrappers} e subrotinas para automatizar a contagem e a impressão de diversas etapas durante a execução dos algoritmos.
+        \item[\texttt{test}]  Implementa vários problemas de teste para o programa.
+    \end{description}
+
+\subsection{Arquivos}
+    Os arquivos mantiveram a hierarquia, mas foi criado um diretório \texttt{data/}
+    para guardar os resultados da execução (\texttt{.dat}) e também os códigos para geração dos
+    gráficos (\texttt{.gp}), através do programa \texttt{gnuplot}.
+
+\subsection{Compilação}
+    A compilação manteve a mesma estrutura:
+    \begin{description}
+        \item[\texttt{make EP2}] Compila o programa, criando o executável.
+        \item[\texttt{make tex2}] Gera os gráficos e compila o relatório, criando o arquivo \texttt{.pdf}.
+        \item[\texttt{make clean}] Realiza a limpeza, deletando os arquivos de saída.
+    \end{description}
+
+    A única observação é que, para o relatório, foi utilizado o programa \texttt{rubber},
+    em sua versão 1.4.

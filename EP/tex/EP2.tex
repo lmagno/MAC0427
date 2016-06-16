@@ -14,12 +14,15 @@
 \usepackage[brazilian]{babel}										% Brazilian portuguese language/hyphenation
 \usepackage[protrusion=true,expansion=true]{microtype}				% Better typography
 \usepackage{amsmath,amsfonts,amsthm}								% Math packages
-\usepackage{graphicx}										% Enable pdflatex
+\usepackage{graphicx}										        % Enable pdflatex
 \usepackage{url}
 \usepackage{txfonts} 												% Use Real set symbol (\varmathbb{R})
 \usepackage{indentfirst}											% Indent first paragraph
 \usepackage{import}													% Use \subimport for better relative import
 \usepackage{natbib}													% Bibliography
+\usepackage{algorithm}												% Write algorithms
+\usepackage{algpseudocode}
+\usepackage{enumitem}												% Use indented descriptions
 
 %%% Custom sectioning (sectsty package)
 \usepackage{sectsty}												% Custom sectioning (see below)
@@ -36,22 +39,27 @@
 \renewcommand{\footrulewidth}{0pt}				% Remove footer underlines
 \setlength{\headheight}{13.6pt}
 
-
-%%% Equation and float numbering
-\numberwithin{equation}{section}		% Equationnumbering: section.eq#
-\numberwithin{figure}{section}			% Figurenumbering: section.fig#
-\numberwithin{table}{section}				% Tablenumbering: section.tab#
-
-
-%%% Maketitle metadata
-\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
-
 %%% Write mathematical definitions
 \newtheorem{theorem}{Teorema}
 \newtheorem{definition}{Definição}
 
+%%% Equation and float numbering
+\numberwithin{equation}{section}		% Equationnumbering: section.eq#
+\numberwithin{figure}{section}			% Figurenumbering: section.fig#
+\numberwithin{table}{section}			% Tablenumbering: section.tab#
+\numberwithin{definition}{section}
+\numberwithin{theorem}{section}
+\numberwithin{algorithm}{section}
+
+%%% Maketitle metadata
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
+
 %%% Bibliography style
 \bibliographystyle{abbrvnat}
+
+%%% Indent descriptions
+\setlist[description]{leftmargin=2\parindent,labelindent=2\parindent}
+
 
 \title{
 		%\vspace{-1in}
@@ -81,8 +89,13 @@
 
 \section{Método de Penalização}
 	\subimport{../tex/EP2/}{penalizacao}
-	
+
+\section{Algoritmo}
+	\subimport{../tex/EP2/}{algoritmo}
+
 \section{O Programa}
+	\subimport{../tex/EP2/}{programa}
+
 \section{Execução}
 \section{Resultados}
 	\subimport{../tex/EP2/}{resultados}

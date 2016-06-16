@@ -1,0 +1,74 @@
+Tendo isto, podemos montar um algoritmo a fim de resolver o problema \ref{eq:problema}.
+
+Dados $\{\mu_k\}_{k = 0}^\infty$ e $\{r_k\}_{k = 0}^\infty$ como definidos acima
+e $x_0^S \in \varmathbb{R}^n$
+\begin{algorithm}[h]
+    \caption{Método de Penalização}
+    \label{alg:penalizacao}
+    \begin{algorithmic}
+        \For {$k = 0,1,2, \dots$}
+            \State \textbf{Passo 1} Usando $x_k^S$ como ponto inicial, encontrar $x_k$ solução
+                   aproximada do subproblema \ref{eq:subproblema}
+                   tal que $\| \nabla Q(x_k, \mu_k) \| \leq r_k$
+
+            \State \textbf{Passo 2} Se $x_k$ satisfaz o critério \ref{eq:parada}, parar.
+            \State \textbf{Passo 3} Escolher $x_{k+1}^S$
+            \State \textbf{Passo 4} Escolher $\mu_{k+1}$
+        \EndFor
+    \end{algorithmic}
+\end{algorithm}
+
+Por motivo de simplicidade, serão usadas as fórmulas
+$$ r_k = \epsilon$$
+$$ x_{k+1}^S \gets x_k$$
+$$ \mu_{k+1} \gets \mu_k/2$$
+onde $\epsilon$ é a tolerância definida para o programa.
+
+\subsection{Mal condicionamento}
+    Como método no primeiro passo foi escolhido o de Newton, no entanto é necessário
+    uma observação. Para encontrar uma direção de descida $d$, o método resolve um sistema
+    na forma
+    $$ \nabla^2 Q(x, \mu) d = -\nabla Q(x, \mu) $$
+
+    Porém, como
+    \begin{equation}
+        \begin{aligned}
+            \nabla^2 Q(x, \mu) &= \nabla^2 f(x) + \frac{1}{\mu}\sum_{i = 0}^m c_i(x)\nabla^2 c_i(x) + \frac{1}{\mu}\sum_{i = 0}^m \nabla c_i(x)\nabla c_i(x)^\top \\
+                               &= \nabla^2 \mathcal{L}(x) + \frac{1}{\mu}\sum_{i = 0}^m \nabla c_i(x)\nabla c_i(x)^\top
+        \end{aligned}
+    \end{equation}
+    nota-se que o último termo é uma matriz de posto $m$ e, para $\mu$ suficientemente
+    pequeno, vale que $\nabla^2 Q(x, \mu)$ é mal condicionada, o que pode inviabilizar
+    a solução do sistema.
+
+    Em seu lugar, podemos utilizar um sistema equivalente introduzindo uma variável
+    auxiliar $z \in \varmathbb{R}^m$:
+
+    \begin{equation*}
+        \begin{bmatrix}
+            \nabla^2 \mathcal{L}(x) & A(x)^\top \\
+            A(x) & -\mu I
+        \end{bmatrix}
+        \begin{bmatrix}
+            d \\
+            z
+        \end{bmatrix} \
+        = \
+        \begin{bmatrix}
+            -\nabla Q(x, \mu) \\
+            0
+        \end{bmatrix}
+    \end{equation*}
+    onde
+    \begin{equation*}
+        A(x) = \
+        \begin{bmatrix}
+            \nabla c_1(x) \\
+            \vdots \\
+            \nabla c_m(x)
+        \end{bmatrix}
+    \end{equation*}
+
+    Esse sistema não apresenta mal condicionamento devido a
+    $\mu$ pequeno e portanto será utilizado na implementação do método de Newton,
+    mas fora isso o método se mantém o mesmo do trabalho anterior.
