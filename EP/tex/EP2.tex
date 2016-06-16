@@ -9,14 +9,17 @@
 \documentclass[paper=a4, fontsize=11pt]{scrartcl}	% Article class of KOMA-script with 11pt font and a4 format
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{fourier}
+% \usepackage{fourier}
 
 \usepackage[brazilian]{babel}										% Brazilian portuguese language/hyphenation
 \usepackage[protrusion=true,expansion=true]{microtype}				% Better typography
 \usepackage{amsmath,amsfonts,amsthm}								% Math packages
-\usepackage[pdftex]{graphicx}										% Enable pdflatex
+\usepackage{graphicx}										% Enable pdflatex
 \usepackage{url}
-
+\usepackage{txfonts} 												% Use Real set symbol (\varmathbb{R})
+\usepackage{indentfirst}											% Indent first paragraph
+\usepackage{import}													% Use \subimport for better relative import
+\usepackage{natbib}													% Bibliography
 
 %%% Custom sectioning (sectsty package)
 \usepackage{sectsty}												% Custom sectioning (see below)
@@ -43,12 +46,19 @@
 %%% Maketitle metadata
 \newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
 
+%%% Write mathematical definitions
+\newtheorem{theorem}{Teorema}
+\newtheorem{definition}{Definição}
+
+%%% Bibliography style
+\bibliographystyle{abbrvnat}
+
 \title{
 		%\vspace{-1in}
 		\usefont{OT1}{bch}{b}{n}
 		\normalfont \normalsize \textsc{Programação Não-Linear} \\ [25pt]
 		\huge Minimização com Restrições de Igualdade \\
-		\LARGE Método de penalidade
+		\LARGE Método de penalização
 }
 
 
@@ -62,19 +72,21 @@
 %%% Begin document
 \begin{document}
 \maketitle
-\begin{figure}
-	\centering
-	\input{teste1}
-\end{figure}
 
-\begin{figure}
-	\centering
-	\input{teste3}
-\end{figure}
+\section{Introdução}
+	\subimport{../tex/EP2/}{introducao}
 
-\begin{figure}
-	\centering
-	\input{teste4}
-\end{figure}
+\section{Otimização Restrita}
+	\subimport{../tex/EP2/}{restrita}
+
+\section{Método de Penalização}
+\section{O Programa}
+\section{Execução}
+\section{Resultados}
+	\subimport{../tex/EP2/}{resultados}
+
+\section{Conclusão}
+
+\bibliography{EP2}
 %%% End document
 \end{document}

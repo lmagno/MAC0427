@@ -1,0 +1,25 @@
+Uma qualificação possível (de fato a mais fraca \citep{Wachsmuth201378}) é a
+\emph{Linear Independence Constraint Qualification} ou LICQ, definida a seguir.
+
+\begin{definition}
+    Um ponto $x^*$ é dito satisfazer LICQ se e somente o conjunto formado pelos
+    gradientes das restrições em $x^*$
+    $$ \{ \nabla c_1(x^*), \dots, \nabla c_m(x^*)\} $$
+    é linearmente independente.
+\end{definition}
+
+Assim, podemos agora enunciar a condição necessária de primeira ordem:
+
+\begin{theorem}
+    Seja $x^*$ um minimizador local do problema \ref{eq:problema} que satisfaça LICQ,
+    então existe $\lambda^* \in \varmathbb{R}^m$ tal que
+
+    \begin{equation}
+        \nabla f(x^*) = \sum_{i = 0}^{m} \lambda_i^* \nabla c_i(x^*)
+    \end{equation}
+
+    onde $\lambda^*$ é conhecido como o vetor de multiplicadores de langrange.
+\end{theorem}
+
+Uma vez que temos uma condição de otimalidade, podemos a utilizar como critério
+de parada no algoritmo a ser implementado.

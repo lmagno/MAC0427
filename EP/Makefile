@@ -61,6 +61,7 @@ TESTS := teste1 teste3 teste4
 TESTS := $(addprefix $(AUX), $(TESTS))
 
 tex2: $(TESTS:=.tex) $(TESTS:=.eps)
+	cp $(TEX)EP2.bib $(AUX); \
 	rubber -d --unsafe --into $(AUX) $(TEX)EP2.tex; \
 	mv $(AUX)EP2.pdf .
 

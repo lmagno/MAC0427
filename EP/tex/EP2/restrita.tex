@@ -1,0 +1,28 @@
+Diferentemente da otimização irrestrita, neste trabalho consideraremos problemas de
+otimização nos quais a região viável não é todo o $\varmathbb{R}^n$ e sim um subconjunto
+seu determinado por várias equações não-lineares.
+
+Podemos formular o problema na seguinte forma:
+\begin{equation}
+    \label{eq:problema}
+    \begin{aligned}
+        & \text{minimizar} & & f(x) \\
+        & \text{sujeita a} & & c_i(x) = 0, \quad i = 1, m
+    \end{aligned}
+\end{equation}
+onde $x  \in \varmathbb{R}^n $ e \footnote{Assumindo $f$ e $c_i$ continuamente diferenciáveis.}
+\begin{equation*}
+    \begin{aligned}
+        & f: & \varmathbb{R}^n \rightarrow \varmathbb{R} & &  \\
+        & c_i: & \varmathbb{R}^n \rightarrow \varmathbb{R} & & ,\quad  i = 1, m
+    \end{aligned}
+\end{equation*}
+
+Portanto, não podemos mais utilizar os algoritmos já desenvolvidos e precisamos
+definir as condições de otimalidade neste novo problema. Para isto, é preciso
+que se defina uma condição de qualificação, isto é, hipóteses adicionais que nos
+permitirão qualificar os minimizadores.
+
+\newpage
+\subsection{LICQ e Multiplicadores de Lagrange}
+    \subimport{restrita/}{lagrange}
