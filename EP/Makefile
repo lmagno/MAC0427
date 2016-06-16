@@ -73,4 +73,4 @@ directories:
 	mkdir -p $(OBJ)
 
 clean:
-	rm -rf EP1 $(OBJ) $(AUX)*
+	rm -rf EP1 EP2 $(OBJ) $(AUX)*
