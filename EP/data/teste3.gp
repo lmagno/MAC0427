@@ -26,7 +26,7 @@ splot c2(x, y)
 unset table
 
 set term epslatex
-set output "teste3.tex"
+set output "../aux/teste3.tex"
 
 set xzeroaxis lt -1 lw 3
 set xtics axis (1) offset 0.5,0
@@ -38,6 +38,6 @@ set label "$y$" at -.1,ymax-0.1 right
 
 
 set size square
-plot "teste3.dat" pt 1 ps 1 t "", \
+plot "../aux/teste3.dat" pt 1 ps 1 t "", \
      "../aux/c1_3" u 1:2 title "$x = 1$" w lines lw 3,\
      "../aux/c2_3" u 1:2 title "$y = 0$" w lines lw 3

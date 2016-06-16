@@ -65,10 +65,9 @@ tex2: $(TESTS:=.tex) $(TESTS:=.eps)
 	rubber -d --unsafe --into $(AUX) $(TEX)EP2.tex; \
 	mv $(AUX)EP2.pdf .
 
-$(AUX)%.tex $(AUX)%.eps: $(DATA)%.gp $(DATA)%.dat
+$(AUX)%.tex $(AUX)%.eps: $(DATA)%.gp $(AUX)%.dat
 	cd $(DATA); \
-	gnuplot $*.gp; \
-	mv $*.tex $*.eps .$(AUX)
+	gnuplot $*.gp
 
 directories:
 	mkdir -p $(OBJ)

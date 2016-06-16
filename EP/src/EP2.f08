@@ -38,11 +38,11 @@ implicit none
     m = 1
 
     ! Cria arquivo para saída formatada em LaTeX
-    inquire(file="data/output.dat", exist=exist)
+    inquire(file="aux/output.dat", exist=exist)
     ! if (exist) then
-    !     open(57, file="data/output.dat", status="old", position="append", action="write")
+    !     open(57, file="aux/output.dat", status="old", position="append", action="write")
     ! else
-    !     open(57, file="data/output.dat", status="new", action="write")
+    !     open(57, file="aux/output.dat", status="new", action="write")
     ! end if
 
     allocate(x(n))
@@ -63,9 +63,9 @@ implicit none
         call setd2c(d2c1)
 
         mu = 10
-        open(19, file="data/teste1.dat", status="unknown", action="write")
-        open(38, file="data/teste1_lagrangean.dat", status="unknown", action="write")
-        open(57, file="data/output.dat", status="unknown", position="append", action="write")
+        open(19, file="aux/teste1.dat", status="unknown", action="write")
+        open(38, file="aux/teste1_lagrangean.dat", status="unknown", action="write")
+        open(57, file="aux/output.dat", status="unknown", position="append", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -93,9 +93,9 @@ implicit none
 
         mu = 10
 
-        open(19, file="data/teste2.dat", status="unknown", action="write")
-        open(38, file="data/teste2_lagrangean.dat", status="unknown", action="write")
-        open(57, file="data/output.dat", status="unknown", position="append", action="write")
+        open(19, file="aux/teste2.dat", status="unknown", action="write")
+        open(38, file="aux/teste2_lagrangean.dat", status="unknown", action="write")
+        open(57, file="aux/output.dat", status="unknown", position="append", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -124,9 +124,9 @@ implicit none
 
         mu = 10
 
-        open(19, file="data/teste3.dat", status="unknown", action="write")
-        open(38, file="data/teste3_lagrangean.dat", status="unknown", action="write")
-        open(57, file="data/output.dat", status="unknown", position="append", action="write")
+        open(19, file="aux/teste3.dat", status="unknown", action="write")
+        open(38, file="aux/teste3_lagrangean.dat", status="unknown", action="write")
+        open(57, file="aux/output.dat", status="unknown", position="append", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -155,9 +155,9 @@ implicit none
 
         mu = 10
 
-        open(19, file="data/teste4.dat", status="unknown", action="write")
-        open(38, file="data/teste4_lagrangean.dat", status="unknown", action="write")
-        open(57, file="data/output.dat", status="unknown", position="append", action="write")
+        open(19, file="aux/teste4.dat", status="unknown", action="write")
+        open(38, file="aux/teste4_lagrangean.dat", status="unknown", action="write")
+        open(57, file="aux/output.dat", status="unknown", position="append", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)

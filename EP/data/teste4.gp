@@ -26,7 +26,7 @@ splot c2(x, y)
 unset table
 
 set term epslatex
-set output "teste4.tex"
+set output "../aux/teste4.tex"
 
 set xzeroaxis lt -1 lw 3
 set xtics axis (1)
@@ -38,6 +38,6 @@ set label "$y$" at -.1,ymax-0.1 right
 
 
 set size square
-plot "teste4.dat" pt 1 ps 1 t "", \
+plot "../aux/teste4.dat" pt 1 ps 1 t "", \
      "../aux/c1_4" u 1:2 title "$(x-1)^2+(y-1)^2 = 1$" w lines lw 3,\
      "../aux/c2_4" u 1:2 title "$(x-1)^2+(y+1)^2 = 1$" w lines lw 3
