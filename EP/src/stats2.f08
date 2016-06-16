@@ -173,6 +173,7 @@ contains
 
         if (nit > 1000000) then
             print '(a8, a10)', method, "FC"
+            write (57, *), method, " & ", "FC", " \\"
             call exit(1)
         end if
     end subroutine iteration
@@ -221,6 +222,16 @@ contains
             end do
         end do
         print '(a8, 2e10.2, 7i10)', method, norm2(cx), norm2(dL), nsub, nf, ng, nh, narm, nnor, nang
+        write (57,'(2a)',advance='no'), method, " & "
+        write (57,'(e10.2, a)',advance='no'), norm2(cx), " & "
+        write (57,'(e10.2, a)',advance='no'), norm2(dL), " & "
+        write (57,'(i10,a)',advance='no'), nsub, " & "
+        write (57,'(i10,a)',advance='no'), nf, " & "
+        write (57,'(i10,a)',advance='no'), ng, " & "
+        write (57,'(i10,a)',advance='no'), nh, " & "
+        write (57,'(i10,a)',advance='no'), narm, " & "
+        write (57,'(i10,a)',advance='no'), nnor, " & "
+        write (57, *), nang, " \\"
 
         deallocate(cx)
         deallocate(dcx)

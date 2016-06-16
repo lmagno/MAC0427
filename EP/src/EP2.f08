@@ -11,6 +11,7 @@ implicit none
     double precision, allocatable :: x(:), x0(:)
     double precision              :: mu, gamma, sigma, theta, eps
     integer                       :: n, m, i
+    logical                       :: exist
 
     ! Chamadas do sistema para criar processos independentes
     ! Útil para matar uma conta específica sem afetar as outras
@@ -36,6 +37,14 @@ implicit none
     n = 2
     m = 1
 
+    ! Cria arquivo para saída formatada em LaTeX
+    inquire(file="data/output.dat", exist=exist)
+    ! if (exist) then
+    !     open(57, file="data/output.dat", status="old", position="append", action="write")
+    ! else
+    !     open(57, file="data/output.dat", status="new", action="write")
+    ! end if
+
     allocate(x(n))
     allocate(x0(n))
     x0(1) = 1
@@ -56,6 +65,7 @@ implicit none
         mu = 10
         open(19, file="data/teste1.dat", status="unknown", action="write")
         open(38, file="data/teste1_lagrangean.dat", status="unknown", action="write")
+        open(57, file="data/output.dat", status="unknown", position="append", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -65,6 +75,7 @@ implicit none
 
         close(19)
         close(38)
+        close(57)
         call exit(0)
     end if
     i = wait(i)
@@ -84,6 +95,7 @@ implicit none
 
         open(19, file="data/teste2.dat", status="unknown", action="write")
         open(38, file="data/teste2_lagrangean.dat", status="unknown", action="write")
+        open(57, file="data/output.dat", status="unknown", position="append", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -93,6 +105,7 @@ implicit none
 
         close(19)
         close(38)
+        close(57)
         call exit(0)
     end if
     i = wait(i)
@@ -113,6 +126,7 @@ implicit none
 
         open(19, file="data/teste3.dat", status="unknown", action="write")
         open(38, file="data/teste3_lagrangean.dat", status="unknown", action="write")
+        open(57, file="data/output.dat", status="unknown", position="append", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -122,6 +136,7 @@ implicit none
 
         close(19)
         close(38)
+        close(57)
         call exit(0)
     end if
     i = wait(i)
@@ -142,6 +157,7 @@ implicit none
 
         open(19, file="data/teste4.dat", status="unknown", action="write")
         open(38, file="data/teste4_lagrangean.dat", status="unknown", action="write")
+        open(57, file="data/output.dat", status="unknown", position="append", action="write")
         call penalty(x, x0, n, m, mu, f, g, h, c, dc, d2c, gamma, sigma, theta, eps, subproblem, iteration, armijo, norm, angle)
 
         call printstat(x, mu)
@@ -151,10 +167,10 @@ implicit none
 
         close(19)
         close(38)
+        close(57)
         call exit(0)
     end if
     i = wait(i)
 
-    call sleep(1)
-
+    close(57)
 end program EP2
